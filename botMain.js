@@ -1,7 +1,5 @@
 require('dotenv').config();
-const Telegraf = require('telegraf');
-const session = require('telegraf/session')
-const Stage = require('telegraf/stage')
+const  { Telegraf, Stage, session } = require('telegraf');
 const Scene = require('telegraf/scenes/base'); 
 const { catchTelegram } = require('telegraf/stage');
 const { resize } = require('telegraf/markup');
