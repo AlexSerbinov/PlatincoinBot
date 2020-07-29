@@ -5,6 +5,7 @@
   "main": "botMain.js",
   "dependencies": {
     "dotenv": "^8.2.0",
+    "mongoose": "^5.9.26",
     "telegraf": "^3.38.0"
   },
   "devDependencies": {},

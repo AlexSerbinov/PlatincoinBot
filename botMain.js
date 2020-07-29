@@ -5,6 +5,21 @@ const { catchTelegram } = require('telegraf/stage');
 const { resize } = require('telegraf/markup');
 const { enter, leave } = Stage
 const bot = new Telegraf(process.env.BOT_TOKEN);
+const db = require('./db/mongo')
+// test methods for db
+db.getAllOrders().then(res=>console.log(res))
+// setTimeout(() => {
+//     db.createOrder({
+//         chatId: 122334432,
+//         userAddress: 'fshfehir383838447348eyr8373',
+//         hash: 'e943439834d4dj483433djdjdhdjdfjdfjkdkdkdk',
+//         amountPLC: 100,
+//         purchaseCurrency: 'BTC',
+//         purchaseCurrencyAmount: 1,
+//         status: 'closed'
+//     }).then(res=>console.log(res))
+// }, 1000);
+
 
 // -=-=-=-=-=-=-= GREETER SCENE -=-=-=-=-=-=-=
 const greeterScene = new Scene('greeter')
