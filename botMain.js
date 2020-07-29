@@ -7,10 +7,10 @@ const { enter, leave } = Stage
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const db = require('./db/mongo')
 // test methods for db
-db.getAllOrders().then(res=>console.log(res))
+// db.getAllOrders().then(res=>console.log(res))
 // setTimeout(() => {
 //     db.createOrder({
-//         chatId: 122334432,
+//         chatId: Date.now(),
 //         userAddress: 'fshfehir383838447348eyr8373',
 //         hash: 'e943439834d4dj483433djdjdhdjdfjdfjkdkdkdk',
 //         amountPLC: 100,
@@ -19,6 +19,8 @@ db.getAllOrders().then(res=>console.log(res))
 //         status: 'closed'
 //     }).then(res=>console.log(res))
 // }, 1000);
+// db.getOrdersByUserId(1596017724157).then(res=>console.log(res))
+// db.deleteAllOrders().then(res=>console.log(res))
 
 
 // -=-=-=-=-=-=-= GREETER SCENE -=-=-=-=-=-=-=

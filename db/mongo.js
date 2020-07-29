@@ -21,12 +21,32 @@ class Order {
         try {
             const order = new orderModel(data);
             return order
-			.save()
-			.then(result => result)
+			    .save()
+			    .then(result => result)
         } catch (error) {
             return error;
         }
-
+    }
+    
+    static async getOrdersByUserId(id){
+        try {
+            return orderModel
+		        .find({chatId: id})
+		        .then(orders => orders); 
+        } catch (error) {
+            return error;
+        }
+    }
+    
+    static async deleteAllOrders(){
+        try {
+            return orderModel
+                .find()
+                .remove()
+                .then(orders => orders)
+        } catch (error) {
+            return error;
+        }
 	}
 }
 
