@@ -1,3 +1,4 @@
+require('dotenv').config();
 const Telegraf = require('telegraf');
 const session = require('telegraf/session')
 const Stage = require('telegraf/stage')
@@ -5,7 +6,7 @@ const Scene = require('telegraf/scenes/base');
 const { catchTelegram } = require('telegraf/stage');
 const { resize } = require('telegraf/markup');
 const { enter, leave } = Stage
-const bot = new Telegraf('1379712795:AAF8iqhDxLn5Q_R-Z01Y3sZHnr4YSvnVauE');
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
 // -=-=-=-=-=-=-= GREETER SCENE -=-=-=-=-=-=-=
 const greeterScene = new Scene('greeter')

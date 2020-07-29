@@ -1,0 +1,24 @@
+{
+  "name": "platincoinbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "botMain.js",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "telegraf": "^3.38.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "nodemon botMain.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexSerbinov/PlatincoinBot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlexSerbinov/PlatincoinBot/issues"
+  },
+  "homepage": "https://github.com/AlexSerbinov/PlatincoinBot#readme"
+}
