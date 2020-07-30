@@ -298,7 +298,7 @@ const myPaymentsHistorySceneMenu = Telegraf.Extra
 
 
 
-const stage = new Stage([greeterScene,buiyngScene, infoScene, myPaymentsHistoryScene, validateAddressScene, choseCurrencyScene, paymentGatewayScene, paymentLinkCryptoScene, paymentLinkFiatScene], { ttl: 10 })
+const stage = new Stage([greeterScene,buiyngScene, infoScene, myPaymentsHistoryScene, validateAddressScene, choseCurrencyScene, paymentGatewayScene, paymentLinkCryptoScene, paymentLinkFiatScene])
 // stage.register(buiyngScene)
 stage.command('cancel', leave())
 bot.use(session())
