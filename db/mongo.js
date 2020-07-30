@@ -31,7 +31,7 @@ class Order {
     static async getOrdersByUserId(id){
         try {
             return orderModel
-		        .find({chatId: id})
+		        .find({userId: id})
 		        .then(orders => orders); 
         } catch (error) {
             return error;
