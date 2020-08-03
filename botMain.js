@@ -11,6 +11,8 @@ const db = require('./db/mongo')
 // setTimeout(() => {
 //     db.createOrder({
 //         userId: Date.now(),
+//         invoiceId: "4979ac8f-c44e-41d9-851b-f65a3665ffab",
+//         invoiceLink: "https://coinsbit.io/merchant/4979ac8f-c44e-41d9-851b-f65a3665ffab",
 //         userAddress: 'fshfehir383838447348eyr8373',
 //         hash: 'e943439834d4dj483433djdjdhdjdfjdfjkdkdkdk',
 //         amountPLC: 100,

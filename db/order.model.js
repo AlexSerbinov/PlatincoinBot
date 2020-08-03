@@ -6,6 +6,14 @@ const OrderSchema = new Schema({
         type: Number,
         required: true
     },
+    invoiceId: {
+        type: String,
+        required: true
+    },
+    invoiceLink: {
+        type: String,
+        required: true
+    },
     userAddress: {
         type: String,
         required: true
