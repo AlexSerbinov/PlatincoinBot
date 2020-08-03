@@ -4,6 +4,7 @@
   "description": "",
   "main": "botMain.js",
   "dependencies": {
+    "btoa": "^1.2.1",
     "dotenv": "^8.2.0",
     "mongoose": "^5.9.26",
     "npm-run-all": "^4.1.5",
