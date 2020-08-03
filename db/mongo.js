@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/platincoin-order', { useNewUrlParser: true, useUnifiedTopology: true })
-	.then(()=> console.log("Connected successfully to MongoDB"))
-    .catch(e => console.error(e))
-    
 require('./order.model')
-const orderModel = mongoose.model('orders'); 
+
+mongoose.connect('mongodb://localhost/platincoin-order', { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log("Connected successfully to MongoDB"))
+    .catch(e => console.error(e))
+
+const orderModel = mongoose.model('orders');
 
 class Order {
     static async getAllOrders() {

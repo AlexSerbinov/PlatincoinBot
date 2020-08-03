@@ -34,6 +34,10 @@ const OrderSchema = new Schema({
         type: String,
         required: true
     },
+    timestamp: {
+        type: Number,
+        required: true
+    },
 })
 
 mongoose.model("orders", OrderSchema)
