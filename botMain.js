@@ -41,7 +41,6 @@ const validateAddressScene = new Scene('validateAddress')
 const choseCurrencyScene = new Scene('chooseCurrency')
 const paymentGatewayScene = new Scene('paymentGateway')
 const paymentLinkCryptoScene = new Scene('paymentLinkCrypto')
-const paymentLinkFiatScene = new Scene('paymentLinkFiat')
 
 const PriceMenu = Telegraf.Extra
     .markdown()
@@ -178,6 +177,7 @@ choseCurrencyScene.enter((ctx) => {
 choseCurrencyScene.hears(['USDT (Tether USD)','USDT', 'TUSD (TrueUSD)', 'TUSD', 'PAX (Paxos Standard)', 'PAX', 'USD (US Dollar)', 'USD', 'EUR (EURO)', 'EUR'], async (ctx) =>{
     ctx.session.paymentCurrency = `${ctx.message.text}`
     // ctx.scene.enter('paymentGateway') // по идее будет 2 разных пэймэнт гатевэй для двух разных способа оплаты
+    if(ctx.session.paymentCurrency) ctx.session.purchaseCurrencyAmount = await fetchCurrencyPairRate(ctx.session.paymentCurrency)
     if(ctx.session.currentScene){
         console.log(`validate address if currentScene message = ${ctx.message.text}`)
         console.log(`validate address if currentScene scene =   ${ctx.session.currentScene}`)
@@ -227,21 +227,34 @@ const chooseCurrencyPaymentGatewayMenu = Telegraf.Extra
     m.callbackButton('🔴 Cancel', 'Cancel'),
     m.callbackButton('ℹ️ Info', 'Info'),
 ]]).resize().removeKeyboard())
+
+async function fetchCurrencyPairRate(currency){
+    try{
+        currency = currency.split(" ")[0]
+        const url = `https://coinsbit.io/api/v1/public/ticker?market=PLC_${currency}`
+        const res = await fetch(url).then(res => res.json())
+        console.log(res.result.ask)
+        return res.result.ask;
+    } catch(e){
+        console.log(e) //по идее лучше заносить значения в бд и если эррор, то доставать значения с бд. Или не лучше, хз:)
+    }
+}
 // -=-=-=-=-=-=- CHOOSE CURRENCY SCENE =-=-=-=-=-=
 
 
 
 // -=-=-=-=-=-=- PAYMENT GATEWAY SCENE =-=-=-=-=-=
 paymentGatewayScene.enter((ctx) => {
+
     console.log(`payment Gateway Scene`)
     if(ctx.session.paymentCurrency === `USD (US Dollar)` || ctx.session.paymentCurrency === `EUR (EURO)`){
-        ctx.reply(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${(Math.random()* 1000).toFixed(0)} PLC \nYour address - ${ctx.session.userAddress} \nPlease choose payment method`,chooseCurrencyPaymentGatewayMenu)
+        ctx.reply(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${(ctx.session.plc_amount*ctx.session.purchaseCurrencyAmount).toFixed(2)} ${ctx.session.paymentCurrency.split(" ")[0]} \nYour address - ${ctx.session.userAddress} \nPlease choose payment method`,chooseCurrencyPaymentGatewayMenu)
     }
     else if(ctx.session.paymentCurrency === `USDT (Tether USD)`){
-        ctx.replyWithMarkdown(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${(Math.random()* 1000).toFixed(0)} PLC \nYour address - ${ctx.session.userAddress} \nNote! USDT accepted only ERC20. Send only ERC20 USDT! \n\nPress "*Continue*" to make a payment.`,chooseCurrencyPaymentGatewayMenu)
+        ctx.replyWithMarkdown(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${(ctx.session.plc_amount*ctx.session.purchaseCurrencyAmount).toFixed(2)} ${ctx.session.paymentCurrency.split(" ")[0]} \nYour address - ${ctx.session.userAddress} \nNote! USDT accepted only ERC20. Send only ERC20 USDT! \n\nPress "*Continue*" to make a payment.`,chooseCurrencyPaymentGatewayMenu)
     }
     else if(ctx.session.paymentCurrency === `PAX (Paxos Standard)` || ctx.session.paymentCurrency === `TUSD (TrueUSD)`){
-    ctx.reply(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${(Math.random()* 1000).toFixed(0)} PLC \nYour address - ${ctx.session.userAddress} \nPlease choose payment method`,chooseCurrencyPaymentGatewayMenu)
+    ctx.reply(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${(ctx.session.plc_amount*ctx.session.purchaseCurrencyAmount).toFixed(2)} ${ctx.session.paymentCurrency.split(" ")[0]} \nYour address - ${ctx.session.userAddress} \nPlease choose payment method`,chooseCurrencyPaymentGatewayMenu)
     }
 
 })
@@ -277,17 +290,10 @@ paymentGatewayScene.hears(['↔️ Continue','Continue'], async (ctx) => {
         userAddress: ctx.session.userAddress,
         amountPLC: result.result.amount,
         purchaseCurrency: result.result.currency,
-        purchaseCurrencyAmount: 1, // вытянуть значение
+        purchaseCurrencyAmount: (ctx.session.plc_amount*ctx.session.purchaseCurrencyAmount).toFixed(2), // вытянуть значение
         status: IN_PROGRESS,
     }).then(res=>console.log(res))
-
-
-
-    if(ctx.session.paymentCurrency === `USD (US Dollar)` || ctx.session.paymentCurrency === `EUR (EURO)`){
-        console.log(`${ctx.message.text} -- здесь будет переход на сцену оплаты криптой`)
-        ctx.scene.enter('paymentLinkFiat')
-    }
-    else if(ctx.session.paymentCurrency === `PAX (Paxos Standard)` || ctx.session.paymentCurrency === `TUSD (TrueUSD)`  || ctx.session.paymentCurrency === `USDT (Tether USD)`){
+    if(ctx.session.paymentCurrency === `PAX (Paxos Standard)` || ctx.session.paymentCurrency === `TUSD (TrueUSD)`  || ctx.session.paymentCurrency === `USDT (Tether USD)`|| ctx.session.paymentCurrency === `USD (US Dollar)` || ctx.session.paymentCurrency === `EUR (EURO)`){
         console.log(`${ctx.message.text} -- здесь будет переход на сцену оплаты криптой`)
         ctx.scene.enter('paymentLinkCrypto')
     }
@@ -340,34 +346,6 @@ const paymentlinkFiatMenu = Telegraf.Extra
 
 
 
-// -=-=-=-=-=-=- PAYMENT LINK FIAT SCENE =-=-=-=-=-=
-paymentLinkFiatScene.enter((ctx) => {
-    console.log(`payment link Fiat Scene`)
-    ctx.replyWithMarkdown(`Great! This order will be active in 1 day. Please go to this *<link>* and make a payment. After payment will be success you recieve the notification about status of your *${ctx.session.plc_amount}* PLC in 5 - 90 mins. \nIf you pay but don't recieve your PLC in 90 mins - please contact support@platincoin.com`, FiatPaymentMenu)
-    console.log(ctx.session.paymentCurrency)
-})
-const FiatPaymentMenu = Telegraf.Extra
-  .markdown()
-  .markup((m) => m.keyboard([
-    m.callbackButton('🚙 Back to main', 'Back to main'),
-    m.callbackButton('ℹ️ My Payments', 'My Payments'),
-]).resize())
-    .markdown()
-  .markup((m) => m.inlineKeyboard([[
-    m.callbackButton('PayPall', 'PayPall'),
-    m.callbackButton('Visa/MasterCard', 'Visa/MasterCard')],[
-    m.callbackButton('QIWI', 'QIWI'),
-    m.callbackButton('Yandex.Money', 'Yandex.Money'),
-  ]]).resize())
-// -=-=-=-=-=-=- PAYMENT LINK SCENE =-=-=-=-=-=
-
-
-bot.action('PayPall', (ctx) => {
-    // ctx.answerCallbackQuery('PayPall')
-    // console.log(`-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=`)
-})
-
-
 // -=-=-=-=-=-=-=-= INFO SCENE -=-=-=-=-=-=-=
 infoScene.enter((ctx) => ctx.reply('project Description',infoSceneMenu))
 const infoSceneMenu = Telegraf.Extra
@@ -392,7 +370,7 @@ const myPaymentsHistorySceneMenu = Telegraf.Extra
 
 
 
-const stage = new Stage([greeterScene,buiyngScene, infoScene, myPaymentsHistoryScene, validateAddressScene, choseCurrencyScene, paymentGatewayScene, paymentLinkCryptoScene, paymentLinkFiatScene])
+const stage = new Stage([greeterScene,buiyngScene, infoScene, myPaymentsHistoryScene, validateAddressScene, choseCurrencyScene, paymentGatewayScene, paymentLinkCryptoScene])
 // stage.register(buiyngScene)
 stage.command('cancel', leave())
 bot.use(session())
@@ -431,3 +409,19 @@ bot.launch()
 //ctx.deleteMessage(ctx.message.message_id)
 // const voidMenu1 = Telegraf.Extra
 // .markup((m) => m.removeKeyboard().resize())
+
+
+// const FiatPaymentMenu = Telegraf.Extra
+//     .markdown()
+//   .markup((m) => m.inlineKeyboard([[
+//     m.callbackButton('PayPall', 'PayPall'),
+//     m.callbackButton('Visa/MasterCard', 'Visa/MasterCard')],[
+//     m.callbackButton('QIWI', 'QIWI'),
+//     m.callbackButton('Yandex.Money', 'Yandex.Money'),
+//   ]]).resize())
+// // -=-=-=-=-=-=- PAYMENT LINK SCENE =-=-=-=-=-=
+
+// bot.action('PayPall', (ctx) => {
+//     // ctx.answerCallbackQuery('PayPall')
+//     // console.log(`-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=`)
+// })
