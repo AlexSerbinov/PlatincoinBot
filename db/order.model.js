@@ -34,17 +34,13 @@ const OrderSchema = new Schema({
         type: Number,
         required: true
     },
-    paymentSystem: {
-        type: String,
-        default: ""
-    },
     status: {
         type: String,
         required: true
     },
     timestamp: {
         type: Number,
-        required: true
+        default: (Date.now()/1000).toFixed()
     },
 })
 

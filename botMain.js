@@ -254,7 +254,6 @@ paymentGatewayScene.hears(['↔️ Continue','Continue'], async (ctx) => {
         "request": "/api/v1/merchant/generate_invoice",
         "nonce": (Date.now()/1000).toFixed()
     }
-    console.log('data', data)
     const jsonString = JSON.stringify(data)
     const payload = btoa(jsonString)
     const signature = crypto.createHmac("sha512", process.env.API_SECRET).update(payload).digest().toString('hex')
@@ -272,16 +271,14 @@ paymentGatewayScene.hears(['↔️ Continue','Continue'], async (ctx) => {
     console.log('result', result)
 
     db.createOrder({
-        userId: Date.now(),
+        userId: ctx.update.message.from.id,
         invoiceId: result.result.invoice,
         invoiceLink: result.result.redirect_link,
         userAddress: ctx.session.userAddress,
-        // hash: 'e943439834d4dj483433djdjdhdjdfjdfjkdkdkdk',
         amountPLC: result.result.amount,
         purchaseCurrency: result.result.currency,
-        purchaseCurrencyAmount: 1, // 
+        purchaseCurrencyAmount: 1, // вытянуть значение
         status: IN_PROGRESS,
-        timestamp: (Date.now()/1000).toFixed(),
     }).then(res=>console.log(res))
 
 
