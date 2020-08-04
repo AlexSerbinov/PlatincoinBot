@@ -1,11 +1,13 @@
 require('dotenv').config();
+const btoa = require('btoa')
+const crypto = require('crypto');
+const fetch = require('node-fetch')
+const db = require('./db/mongo')
 const  { Telegraf, Stage, session } = require('telegraf');
 const Scene = require('telegraf/scenes/base'); 
-const { catchTelegram } = require('telegraf/stage');
-const { resize } = require('telegraf/markup');
 const { enter, leave } = Stage
 const bot = new Telegraf(process.env.BOT_TOKEN);
-const db = require('./db/mongo')
+const { USDT, EUR} = require('./constants')
 // test methods for db
 // db.getAllOrders().then(res=>console.log(res))
 // setTimeout(() => {
@@ -239,7 +241,35 @@ paymentGatewayScene.enter((ctx) => {
     }
 
 })
-paymentGatewayScene.hears(['↔️ Continue','Continue'], (ctx) => {
+paymentGatewayScene.hears(['↔️ Continue','Continue'], async (ctx) => {
+    const data = {
+        "currency": ctx.session.paymentCurrency.split(" ")[0],
+        "success_url": process.env.RETURN_URL,
+        "error_url": 'https://resolve=testplcplc_bot',
+        "amount": ctx.session.plc_amount,
+        "request": "/api/v1/merchant/generate_invoice",
+        "nonce": (Date.now()/1000).toFixed()
+    }
+    console.log('data', data)
+    const jsonString = JSON.stringify(data)
+    const payload = btoa(jsonString)
+    const signature = crypto.createHmac("sha512", process.env.API_SECRET).update(payload).digest().toString('hex')
+    const url = 'https://coinsbit.io/api/v1/merchant/generate_invoice';
+    const result = await fetch(url, {
+        method: 'post',
+        body: JSON.stringify(data),
+        headers: { 
+            'Content-Type': 'application/json',
+            'X-TXC-APIKEY': process.env.API_KEY,
+            'X-TXC-PAYLOAD': payload,
+            'X-TXC-SIGNATURE': signature,
+        },
+    }).then(res => res.json())
+    console.log('result', result)
+
+
+
+
     if(ctx.session.paymentCurrency === `USD (US Dollar)` || ctx.session.paymentCurrency === `EUR (EURO)`){
         console.log(`${ctx.message.text} -- здесь будет переход на сцену оплаты криптой`)
         ctx.scene.enter('paymentLinkFiat')

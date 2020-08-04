@@ -8,15 +8,12 @@ const PAX = 'PAX'
 async function fetchRate(currency){
     try{
         const url = `https://coinsbit.io/api/v1/public/ticker?market=PLC_${currency}`
-        let res = await fetch(url)
-        res = await res.json()
-        res = res.result.ask
-        console.log(res)
-        return res
+        const res = await fetch(url).then(res => res.json())
+        console.log(res.result.ask)
+        return res.result.ask;
     } catch(e){
         console.log(e) //по идее лучше заносить значения в бд и если эррор, то доставать значения с бд. Или не лучше, хз:)
     }
 }
 
 let price = fetchRate(USD)
-
