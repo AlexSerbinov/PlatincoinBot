@@ -1,3 +1,4 @@
+// currency
 const USD = 'USD'
 const EUR = 'EUR'
 const USDT = 'USDT'
@@ -10,4 +11,11 @@ module.exports = {
     USDT,
     TUSD,
     PAX,
+}
+
+// status
+const IN_PROGRESS = 'IN_PROGRESS'
+
+module.exports = {
+    IN_PROGRESS,
 }

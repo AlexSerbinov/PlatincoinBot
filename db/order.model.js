@@ -20,7 +20,7 @@ const OrderSchema = new Schema({
     },
     hash: {
         type: String,
-        required: true
+        default: ""
     },
     amountPLC: {
         type: Number,
