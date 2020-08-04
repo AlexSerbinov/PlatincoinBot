@@ -1,33 +1,24 @@
 require('dotenv').config();
-const btoa = require('btoa')
-const crypto = require('crypto');
 const fetch = require('node-fetch')
 const db = require('./db/mongo')
+const {fetchToCoinsbit, fetchCurrencyPairRate} = require('./services/fetch')
 const  { Telegraf, Stage, session } = require('telegraf');
 const Scene = require('telegraf/scenes/base'); 
 const { enter, leave } = Stage
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const { 
     USDT, 
+    USD,
     EUR,
+    PAX,
+    TUSD,
     IN_PROGRESS,
+    GENERATE,
+    GET_STATUS,
 } = require('./constants')
+
 // test methods for db
 // db.getAllOrders().then(res=>console.log(res))
-// setTimeout(() => {
-//     db.createOrder({
-//         userId: Date.now(),
-//         invoiceId: "4979ac8f-c44e-41d9-851b-f65a3665ffab",
-//         invoiceLink: "https://coinsbit.io/merchant/4979ac8f-c44e-41d9-851b-f65a3665ffab",
-//         userAddress: 'fshfehir383838447348eyr8373',
-//         hash: 'e943439834d4dj483433djdjdhdjdfjdfjkdkdkdk',
-//         amountPLC: 100,
-//         purchaseCurrency: 'BTC',
-//         purchaseCurrencyAmount: 1,
-//         status: 'open',
-//         timestamp: (Date.now()/1000).toFixed(),
-//     }).then(res=>console.log(res))
-// }, 1000);
 // db.getOrderByInvoiceId('8626be93-7e97-42a0-87cf-0fda4e1b3b76').then(res=>console.log(res))
 // db.deleteAllOrders().then(res=>console.log(res))
 // db.addTxHash('8626be93-7e97-42a0-87cf-0fda4e1b3b76', "hashhash-hsah").then(res=>console.log(res))
@@ -229,17 +220,6 @@ const chooseCurrencyPaymentGatewayMenu = Telegraf.Extra
     m.callbackButton('ℹ️ Info', 'Info'),
 ]]).resize().removeKeyboard())
 
-async function fetchCurrencyPairRate(currency){
-    try{
-        currency = currency.split(" ")[0]
-        const url = `https://coinsbit.io/api/v1/public/ticker?market=PLC_${currency}`
-        const res = await fetch(url).then(res => res.json())
-        console.log(res.result.ask)
-        return res.result.ask;
-    } catch(e){
-        console.log(e) //по идее лучше заносить значения в бд и если эррор, то доставать значения с бд. Или не лучше, хз:)
-    }
-}
 // -=-=-=-=-=-=- CHOOSE CURRENCY SCENE =-=-=-=-=-=
 
 
@@ -268,20 +248,8 @@ paymentGatewayScene.hears(['↔️ Continue','Continue'], async (ctx) => {
         "request": "/api/v1/merchant/generate_invoice",
         "nonce": (Date.now()/1000).toFixed()
     }
-    const jsonString = JSON.stringify(data)
-    const payload = btoa(jsonString)
-    const signature = crypto.createHmac("sha512", process.env.API_SECRET).update(payload).digest().toString('hex')
-    const url = 'https://coinsbit.io/api/v1/merchant/generate_invoice';
-    const result = await fetch(url, {
-        method: 'post',
-        body: JSON.stringify(data),
-        headers: { 
-            'Content-Type': 'application/json',
-            'X-TXC-APIKEY': process.env.API_KEY,
-            'X-TXC-PAYLOAD': payload,
-            'X-TXC-SIGNATURE': signature,
-        },
-    }).then(res => res.json())
+    const result = await fetchToCoinsbit(data, GENERATE)
+
     console.log('result', result)
     if(result.success === true) {
         db.createOrder({
