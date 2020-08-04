@@ -7,7 +7,11 @@ const  { Telegraf, Stage, session } = require('telegraf');
 const Scene = require('telegraf/scenes/base'); 
 const { enter, leave } = Stage
 const bot = new Telegraf(process.env.BOT_TOKEN);
-const { USDT, EUR} = require('./constants')
+const { 
+    USDT, 
+    EUR,
+    IN_PROGRESS,
+} = require('./constants')
 // test methods for db
 // db.getAllOrders().then(res=>console.log(res))
 // setTimeout(() => {
@@ -245,7 +249,7 @@ paymentGatewayScene.hears(['↔️ Continue','Continue'], async (ctx) => {
     const data = {
         "currency": ctx.session.paymentCurrency.split(" ")[0],
         "success_url": process.env.RETURN_URL,
-        "error_url": 'https://resolve=testplcplc_bot',
+        "error_url": process.env.RETURN_URL,
         "amount": ctx.session.plc_amount,
         "request": "/api/v1/merchant/generate_invoice",
         "nonce": (Date.now()/1000).toFixed()
@@ -267,6 +271,18 @@ paymentGatewayScene.hears(['↔️ Continue','Continue'], async (ctx) => {
     }).then(res => res.json())
     console.log('result', result)
 
+    db.createOrder({
+        userId: Date.now(),
+        invoiceId: result.result.invoice,
+        invoiceLink: result.result.redirect_link,
+        userAddress: ctx.session.userAddress,
+        // hash: 'e943439834d4dj483433djdjdhdjdfjdfjkdkdkdk',
+        amountPLC: result.result.amount,
+        purchaseCurrency: result.result.currency,
+        purchaseCurrencyAmount: 1, // 
+        status: IN_PROGRESS,
+        timestamp: (Date.now()/1000).toFixed(),
+    }).then(res=>console.log(res))
 
 
 
