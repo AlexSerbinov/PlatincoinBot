@@ -28,8 +28,9 @@ const {
 //         timestamp: (Date.now()/1000).toFixed(),
 //     }).then(res=>console.log(res))
 // }, 1000);
-// db.getOrdersByUserId(1596094490170).then(res=>console.log(res))
+// db.getOrderByInvoiceId('8626be93-7e97-42a0-87cf-0fda4e1b3b76').then(res=>console.log(res))
 // db.deleteAllOrders().then(res=>console.log(res))
+// db.addTxHash('8626be93-7e97-42a0-87cf-0fda4e1b3b76', "hashhash-hsah").then(res=>console.log(res))
 
 
 // -=-=-=-=-=-=-= GREETER SCENE -=-=-=-=-=-=-=
@@ -282,17 +283,18 @@ paymentGatewayScene.hears(['↔️ Continue','Continue'], async (ctx) => {
         },
     }).then(res => res.json())
     console.log('result', result)
-
-    db.createOrder({
-        userId: ctx.update.message.from.id,
-        invoiceId: result.result.invoice,
-        invoiceLink: result.result.redirect_link,
-        userAddress: ctx.session.userAddress,
-        amountPLC: result.result.amount,
-        purchaseCurrency: result.result.currency,
-        purchaseCurrencyAmount: (ctx.session.plc_amount*ctx.session.purchaseCurrencyAmount).toFixed(2), // вытянуть значение
-        status: IN_PROGRESS,
-    }).then(res=>console.log(res))
+    if(result.success === true) {
+        db.createOrder({
+            userId: ctx.update.message.from.id,
+            invoiceId: result.result.invoice,
+            invoiceLink: result.result.redirect_link,
+            userAddress: ctx.session.userAddress,
+            amountPLC: result.result.amount,
+            purchaseCurrency: result.result.currency,
+            purchaseCurrencyAmount: (ctx.session.plc_amount*ctx.session.purchaseCurrencyAmount).toFixed(2),
+            status: IN_PROGRESS,
+        }).then(res=>console.log(res))
+    }
     if(ctx.session.paymentCurrency === `PAX (Paxos Standard)` || ctx.session.paymentCurrency === `TUSD (TrueUSD)`  || ctx.session.paymentCurrency === `USDT (Tether USD)`|| ctx.session.paymentCurrency === `USD (US Dollar)` || ctx.session.paymentCurrency === `EUR (EURO)`){
         console.log(`${ctx.message.text} -- здесь будет переход на сцену оплаты криптой`)
         ctx.scene.enter('paymentLinkCrypto')

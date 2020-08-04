@@ -48,7 +48,28 @@ class Order {
         } catch (error) {
             return error;
         }
-	}
+    }
+
+    static async addTxHash(invoiceId, hash){
+        try {
+            return orderModel
+                .findOneAndUpdate({invoiceId}, {hash})
+                .then(order => order)
+        } catch (error) {
+            return error;
+        }
+    }
+
+    static async getOrderByInvoiceId(id){
+        try {
+            return orderModel
+		        .find({invoiceId: id})
+		        .then(orders => orders); 
+        } catch (error) {
+            return error;
+        }
+    }
+
 }
 
 module.exports = Order;
