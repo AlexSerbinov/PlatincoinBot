@@ -1,5 +1,5 @@
 require('dotenv').config();
-const fetch = require('node-fetch')
+// const fetch = require('node-fetch')
 const db = require('./db/mongo')
 const {fetchToCoinsbit, fetchCurrencyPairRate} = require('./services/fetch')
 const  { Telegraf, Stage, session } = require('telegraf');
@@ -16,6 +16,15 @@ const {
     GENERATE,
     GET_STATUS,
 } = require('./constants')
+
+const data = {
+    "invoice": "13da2b10-9010-4cf4-8d8a-8872843252d0",
+    "request": "/api/v1/merchant/invoice_status",
+    "nonce": (Date.now()/1000).toFixed()
+}
+
+// fetchToCoinsbit(data, GET_STATUS).then(res=>console.log(`status = ${res.result.status}`))
+
 
 // test methods for db
 // db.getAllOrders().then(res=>console.log(res))
