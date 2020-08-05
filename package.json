@@ -13,9 +13,9 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "npm-run-all --parallel startbotMain startCloseTimeChecker",
+    "start": "npm-run-all --parallel startbotMain startStatusChecker",
     "startbotMain": "nodemon botMain.js",
-    "startCloseTimeChecker": "nodemon microservices/CloseTimeChecker"
+    "startStatusChecker": "nodemon microservices/StatusChecker"
   },
   "repository": {
     "type": "git",
