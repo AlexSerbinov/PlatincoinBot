@@ -1,8 +1,7 @@
 require('dotenv').config();
-// const fetch = require('node-fetch')
 const db = require('./db/mongo')
-const {fetchToCoinsbit, fetchCurrencyPairRate} = require('./services/fetch')
-const  { Telegraf, Stage, session } = require('telegraf');
+const { fetchToCoinsbit, fetchCurrencyPairRate } = require('./services/fetch')
+const { Telegraf, Stage, session } = require('telegraf');
 const Scene = require('telegraf/scenes/base'); 
 const { enter, leave } = Stage
 const bot = new Telegraf(process.env.BOT_TOKEN);
@@ -22,7 +21,6 @@ const data = {
     "request": "/api/v1/merchant/invoice_status",
     "nonce": (Date.now()/1000).toFixed()
 }
-
 // fetchToCoinsbit(data, GET_STATUS).then(res=>console.log(`status = ${res.result.status}`))
 
 
@@ -31,6 +29,7 @@ const data = {
 // db.getOrderByInvoiceId('8626be93-7e97-42a0-87cf-0fda4e1b3b76').then(res=>console.log(res))
 // db.deleteAllOrders().then(res=>console.log(res))
 // db.addTxHash('8626be93-7e97-42a0-87cf-0fda4e1b3b76', "hashhash-hsah").then(res=>console.log(res))
+// db.changeStatus('result.result.invoice', "STATUS").then(res=>console.log(res))
 
 
 // -=-=-=-=-=-=-= GREETER SCENE -=-=-=-=-=-=-=

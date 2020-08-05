@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 require('./order.model')
 
-mongoose.connect('mongodb://localhost/platincoin-order', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb://localhost/platincoin-order', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
     .then(() => console.log("Connected successfully to MongoDB"))
     .catch(e => console.error(e))
 
@@ -65,6 +65,16 @@ class Order {
             return orderModel
 		        .find({invoiceId: id})
 		        .then(orders => orders); 
+        } catch (error) {
+            return error;
+        }
+    }
+
+    static async changeStatus(invoiceId, status){
+        try {
+            return orderModel
+                .findOneAndUpdate({invoiceId}, {status})
+                .then(order => order)
         } catch (error) {
             return error;
         }
