@@ -78,8 +78,6 @@ buiyngScene.on('message', (ctx) => {
             m.callbackButton('ℹ️ Info', 'Info')
         ]).resize())
         if(ctx.session.currentScene){
-            // console.log(`validate address if currentScene message = ${ctx.message.text}`)
-            // console.log(`validate address if currentScene scene =   ${ctx.session.currentScene}`)
             ctx.scene.enter(ctx.session.currentScene)
         }
         else ctx.scene.enter('validateAddress')
@@ -123,7 +121,7 @@ function getNumberFromString(message){
 
 // -=-=-=-=-=-= VALIDATE ADDRESS SCENE =-=-=-=-=-=
 validateAddressScene.enter((ctx => {
-    ctx.reply(`Great! Your order was accepted! You will get ${ctx.session.plc_amount} PLC! \nPlease send your PLC address to recieve your Platincoin!`, voidMenu1)
+    ctx.reply(`Great! Your order was accepted! You will get ${ctx.session.plc_amount} PLC! \nPlease, *send your PLC address* to recieve your Platincoin!`, validateAddressSceneMenu)
     console.log(`validate address scene`)
 })
     )
@@ -140,8 +138,6 @@ validateAddressScene.on('message', async (ctx) =>{
     ctx.session.userAddress = ctx.message.text
     let result = await validateAddress(ctx.message.text)
     if(result) {
-        // console.log(`validate address if scene=-=-=-= ${ctx.message.text}`)
-        
         if(ctx.session.currentScene){
             console.log(`validate address if currentScene message = ${ctx.message.text}`)
             console.log(`validate address if currentScene scene =   ${ctx.session.currentScene}`)
@@ -152,6 +148,13 @@ validateAddressScene.on('message', async (ctx) =>{
         ctx.replyWithMarkdown('Ooops! The address is not valid! \nPlatincoin address was wrong. \n*Please, send it again!*')
     }
 })
+const validateAddressSceneMenu = Telegraf.Extra
+    .markdown()
+    .markup((m) => m.keyboard([[
+        m.callbackButton('🔴 Cancel', 'Cancel'),
+        m.callbackButton('ℹ️ Info', 'Info')
+    ]]).resize())
+
 async function validateAddress(message){
     if(Math.random() < 0.99) return true
     else return false
