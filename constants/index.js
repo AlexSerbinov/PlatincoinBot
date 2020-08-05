@@ -15,6 +15,7 @@ const CANCEL = 'CANCEL'
 // COINSBIT API URL's
 const GENERATE = 'https://coinsbit.io/api/v1/merchant/generate_invoice'
 const GET_STATUS = 'https://coinsbit.io/api/v1/merchant/invoice_status'
+const MAKE_WITHDRAW = 'https://coinsbit.io/api/v1/payment/makewithdraw'
 
 module.exports = {
     USD,
@@ -29,4 +30,5 @@ module.exports = {
     CANCEL,
     GENERATE,
     GET_STATUS,
+    MAKE_WITHDRAW,
 }

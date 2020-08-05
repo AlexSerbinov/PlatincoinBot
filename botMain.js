@@ -386,8 +386,14 @@ bot.help(ctx => {
 })
 bot.launch()
 
+const sendMessageToId = (userId, messageData) => {
+    bot.telegram.sendMessage(userId, messageData, {
+        parse_mode: "markdown"
+    })
+}
 
-//ctx.deleteMessage(ctx.message.message_id)
+module.exports = {sendMessageToId}
+
 // const voidMenu1 = Telegraf.Extra
 // .markup((m) => m.removeKeyboard().resize())
 
