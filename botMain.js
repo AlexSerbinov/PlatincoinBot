@@ -51,6 +51,7 @@ const PriceMenu = Telegraf.Extra
         m.callbackButton('ℹ️ My Payments', 'My Payments'),
     ]).resize())
 greeterScene.enter((ctx) => ctx.reply('Please choose option from buttons bellow' ,PriceMenu))
+// greeterScene.enter((ctx) => ctx.reply('Please choose option from buttons bellow' ,PriceMenu))
 greeterScene.hears(['🚙 Buy PLC','Buy PLC'], (ctx) => {
     console.log(`${ctx.message.text} -- здесь будет переход на сцену buying`)
     ctx.reply('Hello! Welcome to the Platincoin! \nPlease choose or input amount PLC what you want to buy!', buiyngSceneMenu)
@@ -312,7 +313,7 @@ paymentGatewayScene.hears(['🔴 Cancel','🔴 Cancel', '🚙 Back to main', 'Ba
 // -=-=-=-=-=-=- PAYMENT LINK CRYPTO SCENE =-=-=-=-=-=
 paymentLinkCryptoScene.enter((ctx) => {
     console.log(`payment link Crypto Scene`)
-    ctx.replyWithMarkdown(`Great! This order will be active in 1 day. Please go to this *<link>* and make a payment. After payment will be success you recieve the notification about status of your *${ctx.session.plc_amount}* PLC in 5 - 90 mins. \nIf you pay but don't recieve your PLC in 90 mins - please contact support@platincoin.com`, paymentlinkFiatMenu )
+    ctx.replyWithMarkdown(`Great! This order will be active in 1 day. Please go to this **[link](http://google.com)** and make a payment. After payment will be success you recieve the notification about status of your *${ctx.session.plc_amount}* PLC in 5 - 90 mins. \nIf you pay but don't recieve your PLC in 90 mins - please contact support@platincoin.com`, paymentlinkFiatMenu )
     console.log(ctx.session.paymentCurrency)
 })
 
