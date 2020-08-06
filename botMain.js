@@ -6,23 +6,9 @@ const Scene = require('telegraf/scenes/base');
 const { enter, leave } = Stage
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const { 
-    USDT, 
-    USD,
-    EUR,
-    PAX,
-    TUSD,
     IN_PROGRESS,
     GENERATE,
-    GET_STATUS,
 } = require('./constants')
-
-const data = {
-    "invoice": "13da2b10-9010-4cf4-8d8a-8872843252d0",
-    "request": "/api/v1/merchant/invoice_status",
-    "nonce": (Date.now()/1000).toFixed()
-}
-// fetchToCoinsbit(data, GET_STATUS).then(res=>console.log(`status = ${res.result.status}`))
-
 
 // test methods for db
 // db.getAllOrders().then(res=>console.log(res))
@@ -58,8 +44,6 @@ greeterScene.hears(['🚙 Buy PLC','Buy PLC'], (ctx) => {
     ctx.scene.enter('buiyng')
 })
 // -=-=-=-=-=-=-= GREETER SCENE -=-=-=-=-=-=-=
-
-
 
 
 
@@ -165,9 +149,8 @@ const validateAddressSceneMenu = Telegraf.Extra
         m.callbackButton('ℹ️ Info', 'Info')
     ]]).resize())
 
-async function validateAddress(message){
-    if(Math.random() < 0.99) return true
-    else return false
+const validateAddress = address => {
+    return address.match(/^P{1}[a-km-zA-HJ-NP-Z1-9]{25,38}$/gm)
 }
 // -=-=-=-=-=-= VALIDATE ADDRESS SCENE =-=-=-=-=-=
 
@@ -232,24 +215,20 @@ const chooseCurrencyPaymentGatewayMenu = Telegraf.Extra
     m.callbackButton('🔴 Cancel', 'Cancel'),
     m.callbackButton('ℹ️ Info', 'Info'),
 ]]).resize().removeKeyboard())
-
 // -=-=-=-=-=-=- CHOOSE CURRENCY SCENE =-=-=-=-=-=
 
 
 
 // -=-=-=-=-=-=- PAYMENT GATEWAY SCENE =-=-=-=-=-=
 paymentGatewayScene.enter((ctx) => {
-
     console.log(`payment Gateway Scene`)
-    if(ctx.session.paymentCurrency === `USD (US Dollar)` || ctx.session.paymentCurrency === `EUR (EURO)`){
+    if((ctx.session.paymentCurrency === `USD (US Dollar)` || ctx.session.paymentCurrency === `EUR (EURO)`) && ctx.session.purchaseCurrencyAmount){
         ctx.reply(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${(ctx.session.plc_amount*ctx.session.purchaseCurrencyAmount).toFixed(2)} ${ctx.session.paymentCurrency.split(" ")[0]} \nYour address - ${ctx.session.userAddress} \nPlease choose payment method`,chooseCurrencyPaymentGatewayMenu)
-    }
-    else if(ctx.session.paymentCurrency === `USDT (Tether USD)`){
+    } else if(ctx.session.paymentCurrency === `USDT (Tether USD)` && ctx.session.purchaseCurrencyAmount){
         ctx.replyWithMarkdown(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${(ctx.session.plc_amount*ctx.session.purchaseCurrencyAmount).toFixed(2)} ${ctx.session.paymentCurrency.split(" ")[0]} \nYour address - ${ctx.session.userAddress} \nNote! USDT accepted only ERC20. Send only ERC20 USDT! \n\nPress "*Continue*" to make a payment.`,chooseCurrencyPaymentGatewayMenu)
-    }
-    else if(ctx.session.paymentCurrency === `PAX (Paxos Standard)` || ctx.session.paymentCurrency === `TUSD (TrueUSD)`){
-    ctx.reply(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${(ctx.session.plc_amount*ctx.session.purchaseCurrencyAmount).toFixed(2)} ${ctx.session.paymentCurrency.split(" ")[0]} \nYour address - ${ctx.session.userAddress} \nPlease choose payment method`,chooseCurrencyPaymentGatewayMenu)
-    }
+    } else if((ctx.session.paymentCurrency === `PAX (Paxos Standard)` || ctx.session.paymentCurrency === `TUSD (TrueUSD)`) && ctx.session.purchaseCurrencyAmount){
+        ctx.reply(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${(ctx.session.plc_amount*ctx.session.purchaseCurrencyAmount).toFixed(2)} ${ctx.session.paymentCurrency.split(" ")[0]} \nYour address - ${ctx.session.userAddress} \nPlease choose payment method`,chooseCurrencyPaymentGatewayMenu)
+    } else ctx.reply(`Sorry, there was an error in calculating the purchase ${ctx.session.paymentCurrency} amount`, paymentlinkFiatMenu)
 
 })
 paymentGatewayScene.hears(['↔️ Continue','Continue'], async (ctx) => {
@@ -262,7 +241,6 @@ paymentGatewayScene.hears(['↔️ Continue','Continue'], async (ctx) => {
         "nonce": (Date.now()/1000).toFixed()
     }
     const result = await fetchToCoinsbit(data, GENERATE)
-
     console.log('result', result)
     if(result.success === true) {
         db.createOrder({
@@ -275,6 +253,7 @@ paymentGatewayScene.hears(['↔️ Continue','Continue'], async (ctx) => {
             purchaseCurrencyAmount: (ctx.session.plc_amount*ctx.session.purchaseCurrencyAmount).toFixed(2),
             status: IN_PROGRESS,
         }).then(res=>console.log(res))
+        ctx.session.InvoiceLink = result.result.redirect_link
     }
     if(ctx.session.paymentCurrency === `PAX (Paxos Standard)` || ctx.session.paymentCurrency === `TUSD (TrueUSD)`  || ctx.session.paymentCurrency === `USDT (Tether USD)`|| ctx.session.paymentCurrency === `USD (US Dollar)` || ctx.session.paymentCurrency === `EUR (EURO)`){
         console.log(`${ctx.message.text} -- здесь будет переход на сцену оплаты криптой`)
@@ -313,8 +292,10 @@ paymentGatewayScene.hears(['🔴 Cancel','🔴 Cancel', '🚙 Back to main', 'Ba
 // -=-=-=-=-=-=- PAYMENT LINK CRYPTO SCENE =-=-=-=-=-=
 paymentLinkCryptoScene.enter((ctx) => {
     console.log(`payment link Crypto Scene`)
-    ctx.replyWithMarkdown(`Great! This order will be active in 1 day. Please go to this **[link](http://google.com)** and make a payment. After payment will be success you recieve the notification about status of your *${ctx.session.plc_amount}* PLC in 5 - 90 mins. \nIf you pay but don't recieve your PLC in 90 mins - please contact support@platincoin.com`, paymentlinkFiatMenu )
-    console.log(ctx.session.paymentCurrency)
+    if(ctx.session.InvoiceLink){
+        ctx.replyWithMarkdown(`Great! This order will be active in 1 day. Please go to this **[link](${ctx.session.InvoiceLink})** and make a payment. After payment will be success you recieve the notification about status of your *${ctx.session.plc_amount}* PLC in 5 - 90 mins. \nIf you pay but don't recieve your PLC in 90 mins - please contact support@platincoin.com`, paymentlinkFiatMenu )
+        console.log(ctx.session.paymentCurrency)
+    } else ctx.replyWithMarkdown(`Sorry, there was an error during invoice creation, please try again`, paymentlinkFiatMenu)
 })
 
 const voidMenu1 = Telegraf.Extra
