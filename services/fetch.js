@@ -30,7 +30,6 @@ const fetchCurrencyPairRate = async currency => {
         currency = currency.split(" ")[0]
         const url = `https://coinsbit.io/api/v1/public/ticker?market=PLC_${currency}`
         const res = await fetch(url).then(res => res.json())
-        console.log(res.result.ask)
         return res.result.ask;
     } catch(error){ 
         return false
