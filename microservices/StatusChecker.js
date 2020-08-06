@@ -9,7 +9,7 @@ const {
  } = require('../constants');
 
 setInterval(async () => {
-    const allOrders = await db.getAllOrders()
+    const allOrders = await db.getAllPendingOrders()
     for (const element of allOrders) {
         console.log(element.invoiceId)
         const data = {

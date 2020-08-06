@@ -26,6 +26,7 @@ const data = {
 
 // test methods for db
 // db.getAllOrders().then(res=>console.log(res))
+// db.getAllPendingOrders().then(res=>console.log(res))
 // db.getOrderByInvoiceId('17925b6b-0992-4d0f-adad-429af72ef9d3').then(res=>console.log(res))
 // db.deleteAllOrders().then(res=>console.log(res))
 // db.addTxHash('8626be93-7e97-42a0-87cf-0fda4e1b3b76', "hashhash-hsah").then(res=>console.log(res))

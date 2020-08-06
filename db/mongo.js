@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { IN_PROGRESS } = require('../constants');
 require('./order.model')
 
 mongoose.connect('mongodb://localhost/platincoin-order', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
@@ -75,6 +76,16 @@ class Order {
             return orderModel
                 .findOneAndUpdate({invoiceId}, {status})
                 .then(order => order)
+        } catch (error) {
+            return error;
+        }
+    }
+
+    static async getAllPendingOrders(){
+        try {
+            return orderModel
+                .find({ status: IN_PROGRESS })
+                .then(orders => orders)
         } catch (error) {
             return error;
         }
