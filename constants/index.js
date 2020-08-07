@@ -11,11 +11,13 @@ const INITIALIZATION = 'INITIALIZATION'
 const PENDING = 'PENDING'
 const SUCCESS = 'SUCCESS'
 const CANCEL = 'CANCEL'
+const WAITING_FOR_PAYMENT = 'WAITING_FOR_PAYMENT'
 
 // COINSBIT API URL's
 const GENERATE = 'https://coinsbit.io/api/v1/merchant/generate_invoice'
 const GET_STATUS = 'https://coinsbit.io/api/v1/merchant/invoice_status'
 const MAKE_WITHDRAW = 'https://coinsbit.io/api/v1/payment/makewithdraw'
+const GET_TX_INFO = 'https://coinsbit.io/api/v1/payment/transaction'
 
 module.exports = {
     USD,
@@ -28,7 +30,9 @@ module.exports = {
     PENDING,
     SUCCESS,
     CANCEL,
+    WAITING_FOR_PAYMENT,
     GENERATE,
     GET_STATUS,
     MAKE_WITHDRAW,
+    GET_TX_INFO,
 }

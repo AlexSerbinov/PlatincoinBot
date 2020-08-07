@@ -22,6 +22,10 @@ const OrderSchema = new Schema({
         type: String,
         default: ""
     },
+    internalCoinsbitTxId: {
+        type: String,
+        default: ""
+    },
     amountPLC: {
         type: Number,
         required: true
@@ -34,9 +38,13 @@ const OrderSchema = new Schema({
         type: Number,
         required: true
     },
-    status: {
+    invoiceStatus: {
         type: String,
         required: true
+    },
+    sendPLCStatus: {
+        type: String,
+        default: ""
     },
     timestamp: {
         type: Number,

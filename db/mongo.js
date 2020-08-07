@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { IN_PROGRESS } = require('../constants');
 require('./order.model')
 
 mongoose.connect('mongodb://localhost/platincoin-order', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
@@ -60,6 +59,15 @@ class Order {
             return error;
         }
     }
+    static async addInternalCoinsbitTxId(invoiceId, internalCoinsbitTxId){
+        try {
+            return orderModel
+                .findOneAndUpdate({invoiceId}, {internalCoinsbitTxId})
+                .then(order => order)
+        } catch (error) {
+            return error;
+        }
+    }
 
     static async getOrderByInvoiceId(id){
         try {
@@ -71,25 +79,37 @@ class Order {
         }
     }
 
-    static async changeStatus(invoiceId, status){
+    static async changeInvoiceStatus(invoiceId, invoiceStatus){
         try {
             return orderModel
-                .findOneAndUpdate({invoiceId}, {status})
+                .findOneAndUpdate({invoiceId}, {invoiceStatus})
                 .then(order => order)
         } catch (error) {
             return error;
         }
     }
 
-    static async getAllPendingOrders(){
+    static async changeSendPLCStatus(invoiceId, sendPLCStatus){
         try {
             return orderModel
-                .find({ status: IN_PROGRESS })
+                .findOneAndUpdate({invoiceId}, {sendPLCStatus})
+                .then(order => order)
+        } catch (error) {
+            return error;
+        }
+    }
+
+    static async getAllOrdersByStatus(status){
+        try {
+            return orderModel
+                .find({ invoiceStatus: status})
                 .then(orders => orders)
         } catch (error) {
             return error;
         }
     }
+
+ 
 
 }
 

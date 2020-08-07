@@ -7,18 +7,20 @@ const Scene = require('telegraf/scenes/base');
 const { enter, leave } = Stage
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const { 
+    SUCCESS,
     IN_PROGRESS,
     GENERATE,
 } = require('./constants')
 
 // test methods for db
-// db.getAllOrders().then(res=>console.log(res))
-// db.getAllPendingOrders().then(res=>console.log(res))
-// db.getOrderByInvoiceId('17925b6b-0992-4d0f-adad-429af72ef9d3').then(res=>console.log(res))
+db.getAllOrders().then(res=>console.log(res))
+// db.getAllOrdersByStatus().then(res=>console.log(res))
+// db.getOrderByInvoiceId('dbe97aea-6c62-4400-ae17-32447e9c32c6').then(res=>console.log(res))
 // db.deleteAllOrders().then(res=>console.log(res))
 // db.addTxHash('8626be93-7e97-42a0-87cf-0fda4e1b3b76', "hashhash-hsah").then(res=>console.log(res))
-// db.changeStatus('result.result.invoice', "STATUS").then(res=>console.log(res))
-
+// db.changeInvoiceStatus("e82ba4c8-9d09-46f8-ae63-0108fd526bb0", "SUCCESS").then(res=>console.log(res))
+// db.addInternalCoinsbitTxId("e82ba4c8-9d09-46f8-ae63-0108fd526bb0", "c9321762-3109-4eaf-afe8-cd62ebf1702d").then(res=>console.log(res))
+// db.getAllOrdersByStatus(SUCCESS).then(res=>console.log(res))
 
 // -=-=-=-=-=-=-= GREETER SCENE -=-=-=-=-=-=-=
 const greeterScene = new Scene('greeter')
@@ -67,15 +69,18 @@ buiyngScene.hears(['ℹ️ Info','Info'], (ctx) => {
 buiyngScene.on('message', (ctx) => {
     ctx.session.plc_amount = getNumberFromString(ctx.message.text)
     if(ctx.session.plc_amount) {
-        const voidMenu1 = Telegraf.Extra
-        .markup((m) => m.keyboard([
-            m.callbackButton('🔴 Cancel', 'Cancel'),
-            m.callbackButton('ℹ️ Info', 'Info')
-        ]).resize())
-        if(ctx.session.currentScene){
-            ctx.scene.enter(ctx.session.currentScene)
+        if(ctx.session.plc_amount <2) ctx.replyWithMarkdown(`Ooops! The amount must be at least 2 PLC`)
+        else{    // else {
+            const voidMenu1 = Telegraf.Extra
+            .markup((m) => m.keyboard([
+                m.callbackButton('🔴 Cancel', 'Cancel'),
+                m.callbackButton('ℹ️ Info', 'Info')
+            ]).resize())
+            if(ctx.session.currentScene){
+                ctx.scene.enter(ctx.session.currentScene)
+            }
+            else ctx.scene.enter('validateAddress')
         }
-        else ctx.scene.enter('validateAddress')
     }
     else {
         ctx.replyWithMarkdown('Ooops! The amount is not a number! Platincoin amount what you want to buy was wrong. \n*Please, send it again!*')
@@ -153,8 +158,8 @@ const validateAddressSceneMenu = Telegraf.Extra
     ]]).resize())
 
 const validateAddress = address => {
-    return true
-    // return address.match(/^P{1}[a-km-zA-HJ-NP-Z1-9]{25,38}$/gm)
+    // return true
+    return address.match(/^P{1}[a-km-zA-HJ-NP-Z1-9]{25,38}$/gm)
 }
 // -=-=-=-=-=-= VALIDATE ADDRESS SCENE =-=-=-=-=-=
 
@@ -169,7 +174,7 @@ choseCurrencyScene.enter((ctx) => {
 choseCurrencyScene.hears(['USDT (Tether USD)','USDT', 'TUSD (TrueUSD)', 'TUSD', 'PAX (Paxos Standard)', 'PAX', 'USD (US Dollar)', 'USD', 'EUR (EURO)', 'EUR'], async (ctx) =>{
     ctx.session.paymentCurrency = `${ctx.message.text}`
     // ctx.scene.enter('paymentGateway') // по идее будет 2 разных пэймэнт гатевэй для двух разных способа оплаты
-    if(ctx.session.paymentCurrency) ctx.session.purchaseCurrencyAmount = await fetchCurrencyPairRate(ctx.session.paymentCurrency)
+    if(ctx.session.paymentCurrency) ctx.session.currencyRate = await fetchCurrencyPairRate(ctx.session.paymentCurrency)
     if(ctx.session.currentScene){
         ctx.scene.enter(ctx.session.currentScene)
     }
@@ -222,12 +227,15 @@ const chooseCurrencyPaymentGatewayMenu = Telegraf.Extra
 // -=-=-=-=-=-=- PAYMENT GATEWAY SCENE =-=-=-=-=-=
 paymentGatewayScene.enter((ctx) => {
     console.log(`payment Gateway Scene`)
-    if((ctx.session.paymentCurrency === `USD (US Dollar)` || ctx.session.paymentCurrency === `EUR (EURO)`) && ctx.session.purchaseCurrencyAmount){
-        ctx.reply(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${roundUp((ctx.session.plc_amount*ctx.session.purchaseCurrencyAmount),-2)} ${ctx.session.paymentCurrency.split(" ")[0]} \nYour address - ${ctx.session.userAddress} \nPlease choose payment method`,chooseCurrencyPaymentGatewayMenu)
-    } else if(ctx.session.paymentCurrency === `USDT (Tether USD)` && ctx.session.purchaseCurrencyAmount){
-        ctx.replyWithMarkdown(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${roundUp((ctx.session.plc_amount*ctx.session.purchaseCurrencyAmount), -4)} ${ctx.session.paymentCurrency.split(" ")[0]} \nYour address - ${ctx.session.userAddress} \n\nNote! USDT accepted only ERC20. Send only ERC20 USDT! \n\nPress "*Continue*" to make a payment.`,chooseCurrencyPaymentGatewayMenu)
-    } else if((ctx.session.paymentCurrency === `PAX (Paxos Standard)` || ctx.session.paymentCurrency === `TUSD (TrueUSD)`) && ctx.session.purchaseCurrencyAmount){
-        ctx.reply(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${roundUp((ctx.session.plc_amount*ctx.session.purchaseCurrencyAmount), -4)} ${ctx.session.paymentCurrency.split(" ")[0]} \nYour address - ${ctx.session.userAddress} \nPlease choose payment method`,chooseCurrencyPaymentGatewayMenu)
+    if((ctx.session.paymentCurrency === `USD (US Dollar)` || ctx.session.paymentCurrency === `EUR (EURO)`) && ctx.session.currencyRate){
+        ctx.session.purchaseCurrencyAmount = roundUp((ctx.session.plc_amount*ctx.session.currencyRate),-2)
+        ctx.reply(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${ctx.session.purchaseCurrencyAmount} ${ctx.session.paymentCurrency.split(" ")[0]} \nYour address - ${ctx.session.userAddress} \nPlease choose payment method`,chooseCurrencyPaymentGatewayMenu)
+    } else if(ctx.session.paymentCurrency === `USDT (Tether USD)` && ctx.session.currencyRate){
+        ctx.session.purchaseCurrencyAmount = roundUp((ctx.session.plc_amount*ctx.session.currencyRate),-4)
+        ctx.replyWithMarkdown(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${ctx.session.purchaseCurrencyAmount} ${ctx.session.paymentCurrency.split(" ")[0]} \nYour address - ${ctx.session.userAddress} \n\nNote! USDT accepted only ERC20. Send only ERC20 USDT! \n\nPress "*Continue*" to make a payment.`,chooseCurrencyPaymentGatewayMenu)
+    } else if((ctx.session.paymentCurrency === `PAX (Paxos Standard)` || ctx.session.paymentCurrency === `TUSD (TrueUSD)`) && ctx.session.currencyRate){
+        ctx.session.purchaseCurrencyAmount = roundUp((ctx.session.plc_amount*ctx.session.currencyRate),-4)
+        ctx.reply(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${ctx.session.purchaseCurrencyAmount} ${ctx.session.paymentCurrency.split(" ")[0]} \nYour address - ${ctx.session.userAddress} \nPlease choose payment method`,chooseCurrencyPaymentGatewayMenu)
     } else ctx.reply(`Sorry, there was an error in calculating the purchase ${ctx.session.paymentCurrency} amount`, paymentlinkFiatMenu)
 
 })
@@ -248,10 +256,10 @@ paymentGatewayScene.hears(['↔️ Continue','Continue'], async (ctx) => {
             invoiceId: result.result.invoice,
             invoiceLink: result.result.redirect_link,
             userAddress: ctx.session.userAddress,
-            amountPLC: result.result.amount,
+            amountPLC: ctx.session.plc_amount,
             purchaseCurrency: result.result.currency,
-            purchaseCurrencyAmount: (ctx.session.plc_amount*ctx.session.purchaseCurrencyAmount).toFixed(4),
-            status: IN_PROGRESS,
+            purchaseCurrencyAmount: (ctx.session.plc_amount*ctx.session.currencyRate).toFixed(4),
+            invoiceStatus: IN_PROGRESS,
         }).then(res=>console.log(res))
         ctx.session.InvoiceLink = result.result.redirect_link
     }
@@ -325,10 +333,35 @@ const infoSceneMenu = Telegraf.Extra
 // -=-=-=-=-=-=-=-= INFO SCENE -=-=-=-=-=-=-=
 
 
-
 // -=-=-=-=-=-= MY PAYMENTS SCENE =-=-=-=-=-=
-myPaymentsHistoryScene.enter((ctx) => {
-    ctx.reply('here will be your payment history', myPaymentsHistorySceneMenu)
+myPaymentsHistoryScene.enter(async (ctx) => {
+    let allOrdersByUser = await db.getOrdersByUserId(ctx.message.chat.id)
+    // console.log(allOrdersByUser)
+    allOrdersByUser.forEach(element => {
+        ctx.replyWithMarkdown(`
+*invoiceId*: \`${element.invoiceId}\`
+*invoiceLink*: \`${element.invoiceLink}\`
+*address*: \`${element.userAddress}\`
+*amountPLC*: \`${element.amountPLC}\`
+*purchaseCurrency*: \`${element.purchaseCurrency}\`
+*purchaseCurrencyAmount*: \`${element.purchaseCurrencyAmount}\`
+*invoceStatus*: \`${element.invoiceStatus}\`
+*sendPLCStatus*: \`${element.sendPLCStatus}\`
+*txHash*: \`${element.hash}\`\n
+        `, {
+            parse_mode: "markdown"
+        })
+    });
+    //     ctx.replyWithMarkdown(`
+    //         *invoiceLink*:${element.invoiceLink}
+    //         *address*:${element.address}
+    //         *amountPLC*:${element.amountPLC}
+    //         *purchaseCurrency*:${element.purchaseCurrency}
+    //         *purchaseCurrencyAmount*:${element.purchaseCurrencyAmount}
+    //         *status*:${element.status}
+    //         *txHash*:${element.hash}
+    //     `)
+    // });
     // ctx.scene.enter(ctx.session.currentScene)
 })
 const myPaymentsHistorySceneMenu = Telegraf.Extra
