@@ -4,16 +4,17 @@ const { fetchToCoinsbit, fetchCurrencyPairRate } = require('./services/fetch')
 const { roundUp } = require('./services/math')
 const { Telegraf, Stage, session } = require('telegraf');
 const Scene = require('telegraf/scenes/base'); 
-const { enter, leave } = Stage
-const bot = new Telegraf(process.env.BOT_TOKEN);
+const { leave } = Stage
+const StatusChecker = require('./microservices/StatusChecker')
 const { 
     SUCCESS,
     IN_PROGRESS,
     GENERATE,
 } = require('./constants')
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
 // test methods for db
-db.getAllOrders().then(res=>console.log(res))
+// db.getAllOrders().then(res=>console.log(res))
 // db.getAllOrdersByStatus().then(res=>console.log(res))
 // db.getOrderByInvoiceId('dbe97aea-6c62-4400-ae17-32447e9c32c6').then(res=>console.log(res))
 // db.deleteAllOrders().then(res=>console.log(res))
@@ -412,4 +413,6 @@ const sendMessageToId = (userId, messageData) => {
     })
 }
 
-module.exports = {sendMessageToId}
+const statusChecker = new StatusChecker(db, fetchToCoinsbit, sendMessageToId);
+statusChecker.statusInvoiceChecher();
+statusChecker.statusPlcChecher();

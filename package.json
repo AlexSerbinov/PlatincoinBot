@@ -13,9 +13,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "npm-run-all --parallel startbotMain startStatusChecker",
-    "startbotMain": "nodemon botMain.js",
-    "startStatusChecker": "nodemon microservices/StatusChecker"
+    "start": "nodemon botMain"
   },
   "repository": {
     "type": "git",
