@@ -39,7 +39,7 @@ class StatusChecker {
                         "request": "/api/v1/payment/makewithdraw",
                         "nonce": (Date.now()/1000).toFixed(),
                     }
-                    this.sendMessageToId(element.userId, `Your payment was accepted, we send your PLC coins soon`) 
+                    this.sendMessageToId(element.userId, `Your payment was accepted, we will send your PLC as soon as posible. You will receive notification about deposit.`) 
                     const sendTx = await this.fetchToCoinsbit(txData, MAKE_WITHDRAW)
                     if(sendTx.hasOwnProperty('result') && sendTx.succes === true) {  
                         if(sendTx.result.hasOwnProperty('txid')){

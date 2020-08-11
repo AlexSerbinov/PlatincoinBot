@@ -355,7 +355,7 @@ const infoSceneMenu = Telegraf.Extra
 // myPaymentsHistoryScene.enter(async (ctx) => {
 async function showPaymentHistory(ctx){
     let allOrdersByUser = await db.getOrdersByUserId(ctx.message.chat.id)
-    if(allOrdersByUser.length === 0) ctx.replyWithMarkdown(` Your order history is clear`)
+    if(allOrdersByUser.length === 0) ctx.replyWithMarkdown(`You don't have any transactions yet!`)
     else {
         allOrdersByUser.forEach(element => {
         try {
