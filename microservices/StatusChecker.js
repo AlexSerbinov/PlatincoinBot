@@ -29,6 +29,7 @@ class StatusChecker {
                 const result = await this.fetchToCoinsbit(data, GET_STATUS)
                 // console.log(result)
                 if (result.result.status === SUCCESS) { 
+                // if (true) { 
                     this.db.changeInvoiceStatus(result.result.invoice, WAITING_FOR_PAYMENT)
                     // send tx to user
                     const txData = {
@@ -38,18 +39,18 @@ class StatusChecker {
                         "request": "/api/v1/payment/makewithdraw",
                         "nonce": (Date.now()/1000).toFixed(),
                     }
+                    this.sendMessageToId(element.userId, `Your payment was accepted, we send your PLC coins soon`) 
                     const sendTx = await this.fetchToCoinsbit(txData, MAKE_WITHDRAW)
-                    // console.log(sendTx)      
-                    if(sendTx.hasOwnProperty('result')) {  
+                    if(sendTx.hasOwnProperty('result') && sendTx.succes === true) {  
                         if(sendTx.result.hasOwnProperty('txid')){
                             this.counter = 0
                             // changed status in our db
                             this.db.addInternalCoinsbitTxId(result.result.invoice, sendTx.result.txid)
                         }           
                     } else {
-                        console.log(`INTERNAL SERVER PASHA ERROR ${element.invoiceId}`) 
+                        console.log('INTERNAL SERVER PASHA ERROR', sendTx.message) 
                         if(this.counter < 1){
-                            this.sendMessageToId(350985285, `*WARNING! Not enough money on the admin address to send PLC to users*`)
+                            this.sendMessageToId(350985285, `*ERROR!* ${JSON.stringify(sendTx.message)}`)  //\n*Invoice:* ${element.invoiceId} но у меня показівается только одго сообщение и в этом пока нет смысла
                             this.counter++
                         }
                     }
@@ -60,7 +61,7 @@ class StatusChecker {
                     this.sendMessageToId(element.userId, `Ooops, something went wrong! Your payment was not accepted. \nThis order was closed! If you sent money but, see this message please, contact support@platincoin.com \n*Thanks for being with Platincoin!*`)  /// напмсать сюда сообщение ошибку!!!!!!!!!!!!
                 } else continue;
             };
-        }, 60000);
+        }, 6000);
     }
 
     statusPlcChecher(){
@@ -74,10 +75,6 @@ class StatusChecker {
                 }
                 console.log(data)
                 const result = await this.fetchToCoinsbit(data, GET_TX_INFO)
-                console.log(`-=-=-=-=-=-=-=-=-=-=-`)
-                console.log(element)
-                console.log(element.invoiceId)
-                console.log(`-=-=-=-=-=-=-=-=-=-=-`)
                 if(result.result.txHash){
                     this.db.changeInvoiceStatus(element.invoiceId, SUCCESS)
                     this.db.changeSendPLCStatus(element.invoiceId, SUCCESS)
