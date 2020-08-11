@@ -14,7 +14,6 @@ const {
     RETURN_URL,
 } = require('./constants')
 const bot = new Telegraf(process.env.BOT_TOKEN);
-
 // test methods for db
 // db.getAllOrders().then(res=>console.log(res))
 // db.getAllOrdersByStatus().then(res=>console.log(res))
