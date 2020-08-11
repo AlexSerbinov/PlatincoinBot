@@ -11,6 +11,7 @@ const {
     SUCCESS,
     IN_PROGRESS,
     GENERATE,
+    RETURN_URL,
 } = require('./constants')
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -56,7 +57,6 @@ greeterScene.hears(['🚙 Buy PLC','Buy PLC'], (ctx) => {
 
 // -=-=-=-=-=-=-= BUING SCENE -=-=-=-=-=-=-=
 buiyngScene.enter((ctx) => {
-    console.log(`buiyng scene`)
     ctx.session.currentSceneForInfo = 'buiyng'
 })
 buiyngScene.hears(['❌ Cancel','❌ Cancel', '🚙 Back to main', 'Back to main'], (ctx) => {
@@ -74,7 +74,7 @@ buiyngScene.hears(['ℹ️ Info','Info'], (ctx) => {
 buiyngScene.on('message', (ctx) => {
     ctx.session.plc_amount = getNumberFromString(ctx.message.text)
     if(ctx.session.plc_amount) {
-        if(ctx.session.plc_amount <2) ctx.replyWithMarkdown(`Ooops! The amount must be at least 2 PLC`)
+        if(ctx.session.plc_amount <2 || ctx.session.plc_amount>1000000) ctx.replyWithMarkdown(`Ooops! The amount must be at least 2 PLC and no more than 1000000 PLC`)
         else{    // else {
             const voidMenu1 = Telegraf.Extra
             .markup((m) => m.keyboard([
@@ -109,7 +109,7 @@ function getNumberFromString(message){
         let resFloat = message.match(/\d+\.\d+/g)
         if(resFloat !== null) {
             resFloat = parseFloat(resFloat[0])
-            return resFloat
+            return resFloat.toFixed(4)
         } else {
             message.match(/\d+/)
             resInt = parseInt(message.replace(/[^\d]/g, ''))
@@ -267,7 +267,7 @@ paymentGatewayScene.hears(['➡️ Continue','Continue'], async (ctx) => {
             purchaseCurrency: result.result.currency,
             purchaseCurrencyAmount: (ctx.session.plc_amount*ctx.session.currencyRate).toFixed(4),
             invoiceStatus: IN_PROGRESS,
-        }).then(res=>console.log(res))
+        })//.then(res=>console.log(res))
         ctx.session.InvoiceLink = result.result.redirect_link
     }
     if(ctx.session.paymentCurrency === `PAX (Paxos Standard)` || ctx.session.paymentCurrency === `TUSD (TrueUSD)`  || ctx.session.paymentCurrency === `USDT (Tether USD)`|| ctx.session.paymentCurrency === `USD (US Dollar)` || ctx.session.paymentCurrency === `EUR (EURO)`){
@@ -356,8 +356,9 @@ const infoSceneMenu = Telegraf.Extra
 // myPaymentsHistoryScene.enter(async (ctx) => {
 async function showPaymentHistory(ctx){
     let allOrdersByUser = await db.getOrdersByUserId(ctx.message.chat.id)
-    // console.log(allOrdersByUser)
-    allOrdersByUser.forEach(element => {
+    if(allOrdersByUser.length === 0) ctx.replyWithMarkdown(` Your order history is clear`)
+    else {
+        allOrdersByUser.forEach(element => {
         try {
             if(element.invoiceStatus !== 'CANCEL'){
                 ctx.replyWithMarkdown(`
@@ -374,6 +375,7 @@ ${humanDate(element.timestamp*1000)}
         } catch (error) {  
         }
     });
+    }
     //     ctx.replyWithMarkdown(`
     //         *invoiceLink*:${element.invoiceLink}
     //         *address*:${element.address}
@@ -423,7 +425,7 @@ bot.hears(['🚙 Buy PLC','Buy PLC'], (ctx) => {
 })
 bot.hears(['ℹ️ Info','Info'], (ctx) => {
     // ctx.scene.enter('info')
-    ctx.reply('PLATINCOIN (PLC) is a blockchain product and digital currency designed to address online payment challenges. PLC is a cryptocurrency with its own closed ecosystem. We are provide various opportunities, such as Power Minter and PLC Secure Box for passive earnings, ATM cryptomats for instant transfer of PLC to fiat, PoS terminals for paying for goods and services using PLC, Marketplace for selling your own goods and developing your business. \nSite: https://platincoin.com/en \nWe on CoinMarketCap: https://coinmarketcap.com/ru/currencies/platincoin/')
+    ctx.replyWithMarkdown('*PLATINCOIN* (PLC) is a blockchain product and digital currency designed to address online payment challenges. PLC is a cryptocurrency with its own closed ecosystem. We are provide various opportunities, such as Power Minter and PLC Secure Box for passive earnings, ATM cryptomats for instant transfer of PLC to fiat, PoS terminals for paying for goods and services using PLC, Marketplace for selling your own goods and developing your business. \nSite: https://platincoin.com/en \nWe on CoinMarketCap: https://coinmarketcap.com/ru/currencies/platincoin/')
 
 })
 // -=-=-=-=-=-= COMMON METHODS =-=-=-=-=-=

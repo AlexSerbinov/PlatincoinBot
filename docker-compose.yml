@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  nodejs:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: nodejs
+    container_name: platincoin
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - BOT_TOKEN=$BOT_TOKEN
+      - API_KEY=$API_KEY
+      - API_SECRET=$API_SECRET
+      - RETURN_URL=$RETURN_URL
+    volumes:
+      - .:/home/alex/PlatincoinBot
+      - node_modules:/home/alex/PlatincoinBot/node_modules
+    networks:
+      - app-network
+    # command: ./wait-for.sh db:27017 -- /home/alex/PlatincoinBot/node_modules/.bin/nodemon app.js
+
+  db:
+    image: mongo
+    container_name: db_platincoin
+    restart: unless-stopped
+    volumes:     
+      - dbdata:/data/db
+    networks:
+      - app-network  
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  dbdata:
+  node_modules:

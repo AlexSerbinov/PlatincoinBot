@@ -73,7 +73,7 @@ class StatusChecker {
                     "request": "/api/v1/payment/transaction",
                     "nonce": (Date.now()).toFixed()
                 }
-                console.log(data)
+                // console.log(data)
                 const result = await this.fetchToCoinsbit(data, GET_TX_INFO)
                 if(result.result.txHash){
                     this.db.changeInvoiceStatus(element.invoiceId, SUCCESS)

@@ -18,6 +18,7 @@ const GENERATE = 'https://coinsbit.io/api/v1/merchant/generate_invoice'
 const GET_STATUS = 'https://coinsbit.io/api/v1/merchant/invoice_status'
 const MAKE_WITHDRAW = 'https://coinsbit.io/api/v1/payment/makewithdraw'
 const GET_TX_INFO = 'https://coinsbit.io/api/v1/payment/transaction'
+const RETURN_URL = 'tg://resolve?domain=coinsbit_buy_sell_bot'
 
 module.exports = {
     USD,
@@ -35,4 +36,5 @@ module.exports = {
     GET_STATUS,
     MAKE_WITHDRAW,
     GET_TX_INFO,
+    RETURN_URL,
 }
