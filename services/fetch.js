@@ -20,7 +20,7 @@ const fetchToCoinsbit = async (data, url) => {
         }).then(res => res.json())
         return result
     } catch (error) {
-        console.log(error)
+        console.error("Error in fetchToCoinsbit: ", error)
         return(error) 
     }
 }
@@ -32,6 +32,7 @@ const fetchCurrencyPairRate = async currency => {
         const res = await fetch(url).then(res => res.json())
         return res.result.ask;
     } catch(error){ 
+        console.error("Error in fetchCurrencyPairRate: ", error)
         return false
     }
 }

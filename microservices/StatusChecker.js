@@ -61,7 +61,7 @@ class StatusChecker {
                     this.sendMessageToId(element.userId, `Ooops, something went wrong! Your payment was not accepted. \nThis order was closed! If you sent money but, see this message please, contact support@platincoin.com \n*Thanks for being with Platincoin!*`)  /// напмсать сюда сообщение ошибку!!!!!!!!!!!!
                 } else continue;
             };
-        }, 6000);
+        }, 30000);
     }
 
     statusPlcChecher(){
@@ -82,7 +82,7 @@ class StatusChecker {
                     this.sendMessageToId(element.userId, `congratulations your payment successfully accepted. Your PLC send to your wallet ${result.result.txHash} \n\n*Thanks for being with Platincoin!*`) /// Вывесте сообщение об успеху с хэшем
                 }
             };
-        }, 5000);
+        }, 60000);
     }
 }
 

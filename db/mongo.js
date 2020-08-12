@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
+require('dotenv').config();
 require('./order.model')
 
-mongoose.connect('mongodb://172.20.0.3/platincoin-order', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
+mongoose.connect(`mongodb://${process.env.DB_URL}/platincoin-order`, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
     .then(() => console.log("Connected successfully to MongoDB"))
     .catch(e => console.error(e))
 
