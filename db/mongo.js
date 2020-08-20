@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 require('./order.model')
 
-mongoose.connect('mongodb://172.20.0.3/platincoin-order', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
+// mongoose.connect('mongodb://172.20.0.2/platincoin-order', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
+mongoose.connect('mongodb://127.0.0.1/platincoin-order', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
     .then(() => console.log("Connected successfully to MongoDB"))
     .catch(e => console.error(e))
 
@@ -49,6 +50,16 @@ class Order {
             return error;
         }
     }
+    static async deleteOrderByInvoiceId(id){
+        try {
+            return orderModel
+		        .find({invoiceId: id})
+                .remove()
+		        .then(orders => orders); 
+        } catch (error) {
+            return error;
+        }
+    }
 
     static async addTxHash(invoiceId, hash){
         try {
@@ -83,6 +94,35 @@ class Order {
         try {
             return orderModel
                 .findOneAndUpdate({invoiceId}, {invoiceStatus})
+                .then(order => order)
+        } catch (error) {
+            return error;
+        }
+    }
+
+    static async changeBalanceToTradeStatus(invoiceId, balanceToTradeStatus){
+        try {
+            return orderModel
+                .findOneAndUpdate({invoiceId}, {balanceToTradeStatus})
+                .then(order => order)
+        } catch (error) {
+            return error;
+        }
+    }
+    static async changeNewMarketOrderStatus(invoiceId, newMarketOrderStatus){
+        try {
+            return orderModel
+                .findOneAndUpdate({invoiceId}, {newMarketOrderStatus})
+                .then(order => order)
+        } catch (error) {
+            return error;
+        }
+    }
+
+    static async changeBalanceToMainStatus(invoiceId, balanceToMainStatus){
+        try {
+            return orderModel
+                .findOneAndUpdate({invoiceId}, {balanceToMainStatus})
                 .then(order => order)
         } catch (error) {
             return error;

@@ -16,13 +16,18 @@ const {
 const bot = new Telegraf(process.env.BOT_TOKEN);
 // test methods for db
 // db.getAllOrders().then(res=>console.log(res))
+//
 // db.getAllOrdersByStatus().then(res=>console.log(res))
-// db.getOrderByInvoiceId('dbe97aea-6c62-4400-ae17-32447e9c32c6').then(res=>console.log(res))
+// db.getOrderByInvoiceId('c2249533-7a1f-4112-b680-96115faf41b5').then(res=>console.log(res))
 // db.deleteAllOrders().then(res=>console.log(res))
+// db.deleteOrderByInvoiceId('c94ffdf5-53f5-4d5d-a7cb-d7dd8861e7a3').then(res=>console.log(res))
 // db.addTxHash('8626be93-7e97-42a0-87cf-0fda4e1b3b76', "hashhash-hsah").then(res=>console.log(res))
-// db.changeInvoiceStatus("e82ba4c8-9d09-46f8-ae63-0108fd526bb0", "SUCCESS").then(res=>console.log(res))
+// db.changeInvoiceStatus("3af72938-327b-4df4-bad6-c1b0c32a5e69", "IN_PROGRESS").then(res=>console.log(res))
+// db.changeInvoiceStatus("56bbd06d-38b9-46c9-b179-d14a15416a72", "IN_PROGRESS").then(res=>console.log(res))
+// db.changeInvoiceStatus("b23a29b4-4999-4e89-91d5-77484caba672", "IN_PROGRESS").then(res=>console.log(res))
 // db.addInternalCoinsbitTxId("e82ba4c8-9d09-46f8-ae63-0108fd526bb0", "c9321762-3109-4eaf-afe8-cd62ebf1702d").then(res=>console.log(res))
 // db.getAllOrdersByStatus(SUCCESS).then(res=>console.log(res))
+// db.getOrdersByUserId(350985285).then(res=>console.log(res))
 
 // -=-=-=-=-=-=-= GREETER SCENE -=-=-=-=-=-=-=
 const greeterScene = new Scene('greeter')
@@ -37,7 +42,7 @@ const paymentLinkCryptoScene = new Scene('paymentLinkCrypto')
 const PriceMenu = Telegraf.Extra
     .markdown()
     .markup((m) => m.keyboard([
-        m.callbackButton('🚙 Buy PLC', 'Buy PLC'),
+        m.callbackButton('💰 Buy PLC', 'Buy PLC'),
         m.callbackButton('ℹ️ Info', 'Info'),
         m.callbackButton('ℹ️ My Payments', 'My Payments'),
     ]).resize())
@@ -46,7 +51,7 @@ greeterScene.enter((ctx) => {
     ctx.session.currentSceneForInfo = 'greeter'
 })
 // greeterScene.enter((ctx) => ctx.reply('Please choose option from buttons bellow' ,PriceMenu))
-greeterScene.hears(['🚙 Buy PLC','Buy PLC'], (ctx) => {
+greeterScene.hears(['💰 Buy PLC','Buy PLC'], (ctx) => {
     ctx.reply('Please choose or input amount PLC what you want to buy!', buiyngSceneMenu)
     ctx.scene.enter('buiyng')
 })
@@ -188,7 +193,7 @@ choseCurrencyScene.hears(['USDT (Tether USD)','USDT', 'TUSD (TrueUSD)', 'TUSD', 
     else ctx.scene.enter('paymentGateway')
 })
 
-// choseCurrencyScene.hears(['➡️ Continue','Continue'], (ctx) => {
+// choseCurrencyScene.hears(['✅ Continue','Continue'], (ctx) => {
 //     console.log(`continue under scene`)
 
 //     ctx.scene.enter('paymentLinkCryptoScene')
@@ -218,7 +223,7 @@ const currencyMenu = Telegraf.Extra
 const chooseCurrencyPaymentGatewayMenu = Telegraf.Extra
 .markdown()
 .markup((m) => m.keyboard([[
-    m.callbackButton('➡️ Continue', 'Continue'),
+    m.callbackButton('✅ Continue', 'Continue'),
     m.callbackButton('⬅️ Change currency', 'Change currency'),
 ],[
     m.callbackButton('⬅️ Change address', 'Change address'),
@@ -245,7 +250,7 @@ paymentGatewayScene.enter((ctx) => {
     } else ctx.reply(`Sorry, there was an error in calculating the purchase ${ctx.session.paymentCurrency} amount`, paymentlinkFiatMenu)
 
 })
-paymentGatewayScene.hears(['➡️ Continue','Continue'], async (ctx) => {
+paymentGatewayScene.hears(['✅ Continue','Continue'], async (ctx) => {
     const data = {
         "currency": ctx.session.paymentCurrency.split(" ")[0],
         "success_url": process.env.RETURN_URL,
@@ -302,7 +307,7 @@ paymentLinkCryptoScene.enter((ctx) => {
     if(ctx.session.InvoiceLink){
         ctx.replyWithMarkdown('Please wait, order is being created...', paymentlinkFiatMenu)
             setTimeout(() => {
-        ctx.replyWithMarkdown(`Great! This order will be active in 1 day. Please go to this **[link](${ctx.session.InvoiceLink})** and make a payment. After payment will be success you recieve the notification about status of your *${ctx.session.plc_amount}* PLC in 5 - 90 mins. \nIf you pay but don't recieve your PLC in 90 mins - please contact support@platincoin.com`,  {
+        ctx.replyWithMarkdown(`Great! This order will be active in 1 day. Please click on **[Go to Invoice](${ctx.session.InvoiceLink})** and make a payment. After payment will be success you recieve the notification about status of your *${ctx.session.plc_amount}* PLC in 5 - 90 mins. \nIf you pay but don't recieve your PLC in 90 mins - please contact support@platincoin.com`,  {
             reply_markup: Markup.inlineKeyboard([[
                 {
                     text: `Go to invoice`,
@@ -357,23 +362,39 @@ async function showPaymentHistory(ctx){
     let allOrdersByUser = await db.getOrdersByUserId(ctx.message.chat.id)
     if(allOrdersByUser.length === 0) ctx.replyWithMarkdown(`You don't have any transactions yet!`)
     else {
+        let i = 0;
         allOrdersByUser.forEach(element => {
         try {
             if(element.invoiceStatus !== 'CANCEL'){
+                i++
+                if(element.hash){
                 ctx.replyWithMarkdown(`
 ${humanDate(element.timestamp*1000)}
 *invoice*: ${element.invoiceId}
 *address*:${element.userAddress}
 *amount*: ${element.amountPLC} PLC
 *paid*: ${element.purchaseCurrencyAmount} ${element.purchaseCurrency}
-*txHash*: ${element.hash}
-        `, {
-            parse_mode: "markdown"
-        })
+*txHash*: https://platincoin.info/#/tx/${element.hash}
+`, {
+        parse_mode: "markdown"
+    })
+        } else {
+            ctx.replyWithMarkdown(`
+${humanDate(element.timestamp*1000)}
+*invoice*: ${element.invoiceId}
+*address*:${element.userAddress}
+*amount*: ${element.amountPLC} PLC
+*paid*: ${element.purchaseCurrencyAmount} ${element.purchaseCurrency}
+*txHash*:
+`, {
+        parse_mode: "markdown"
+    })
+        }
             }
         } catch (error) {  
         }
     });
+        if(i === 0) ctx.replyWithMarkdown(`You don't have any transactions yet!`)
     }
     //     ctx.replyWithMarkdown(`
     //         *invoiceLink*:${element.invoiceLink}
@@ -418,7 +439,7 @@ bot.hears(['ℹ️ My Payments','My Payments'], (ctx) => {
     // ctx.scene.enter('myPayments')
     showPaymentHistory(ctx)
 })
-bot.hears(['🚙 Buy PLC','Buy PLC'], (ctx) => {
+bot.hears(['💰 Buy PLC','Buy PLC'], (ctx) => {
     ctx.reply('Please choose or input amount PLC what you want to buy!', buiyngSceneMenu)
     ctx.scene.enter('buiyng')
 })

@@ -42,6 +42,21 @@ const OrderSchema = new Schema({
         type: String,
         required: true
     },
+    balanceToTradeStatus: {
+        type: Boolean,
+        default: false,
+        // required: true
+    },
+    newMarketOrderStatus: {
+        type: Boolean,
+        default: false,
+        // required: true
+    },
+    balanceToMainStatus: {
+        type: Boolean,
+        default: false,
+        // required: true
+    },
     sendPLCStatus: {
         type: String,
         default: ""
