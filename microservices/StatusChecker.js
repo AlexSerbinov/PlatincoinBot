@@ -78,7 +78,7 @@ class StatusChecker {
                     this.sendMessageToId(element.userId, `Ooops, something went wrong! Your payment was not accepted. \nThis order was closed! If you sent money but, see this message please, contact support@platincoin.com \n*Thanks for being with Platincoin!*`)  /// напмсать сюда сообщение ошибку!!!!!!!!!!!!
                 } else continue;
             };
-        }, 7000);
+        }, 30000);
     }
 
     statusPlcChecher(){
@@ -101,17 +101,7 @@ class StatusChecker {
                     this.sendMessageToId(element.userId, `congratulations your payment successfully accepted. Your PLC send to your wallet **[https://platincoin.info/#/tx/${PlctxStatus.result.txHash}](https://platincoin.info/#/tx/${PlctxStatus.result.txHash})** \n\n*Thanks for being with Platincoin!*`) /// Вывесте сообщение об успеху с хэшем
                 }
             };
-        }, 30000);
-    }
-
-   async getInvoiceStatus(invoiceId) {  
-        const data = {
-            "invoice": invoiceId,
-            "request": "/api/v1/merchant/invoice_status",
-            "nonce": (Date.now()).toFixed()
-        }
-        const invoiceStatus = await this.fetchToCoinsbit(data, GET_STATUS)
-        return invoiceStatus
+        }, 60000);
     }
 
    async balanceTransfer(ticker, amountFormInvoice, direction) {  //ticker here not PLC

@@ -11,7 +11,6 @@ const {
     SUCCESS,
     IN_PROGRESS,
     GENERATE,
-    RETURN_URL,
 } = require('./constants')
 const bot = new Telegraf(process.env.BOT_TOKEN);
 // test methods for db

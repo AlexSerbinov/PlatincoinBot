@@ -47,5 +47,4 @@ module.exports = {
     NEW_MARKET_ORDER,
     MAKE_WITHDRAW,
     GET_TX_INFO,
-    RETURN_URL,
 }
