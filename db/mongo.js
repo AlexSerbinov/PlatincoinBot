@@ -61,6 +61,16 @@ class Order {
             return error;
         }
     }
+    static async deleteAllOrdersByUserId(UserId){
+        try {
+            return orderModel
+		        .find({userId: UserId})
+                .deleteMany()
+		        .then(orders => orders); 
+        } catch (error) {
+            return error;
+        }
+    }
 
     static async addTxHash(invoiceId, hash){
         try {

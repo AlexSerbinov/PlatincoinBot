@@ -15,15 +15,13 @@ const {
 const bot = new Telegraf(process.env.BOT_TOKEN);
 // test methods for db
 // db.getAllOrders().then(res=>console.log(res))
-//
 // db.getAllOrdersByStatus().then(res=>console.log(res))
-// db.getOrderByInvoiceId('c2249533-7a1f-4112-b680-96115faf41b5').then(res=>console.log(res))
+// db.getOrderByInvoiceId('f95ed7a5-764f-4788-b89e-dbc8877227d8').then(res=>console.log(res))
 // db.deleteAllOrders().then(res=>console.log(res))
 // db.deleteOrderByInvoiceId('c94ffdf5-53f5-4d5d-a7cb-d7dd8861e7a3').then(res=>console.log(res))
+// db.deleteAllOrdersByUserId('350985285').then(res=>console.log(res))
 // db.addTxHash('8626be93-7e97-42a0-87cf-0fda4e1b3b76', "hashhash-hsah").then(res=>console.log(res))
-// db.changeInvoiceStatus("3af72938-327b-4df4-bad6-c1b0c32a5e69", "IN_PROGRESS").then(res=>console.log(res))
-// db.changeInvoiceStatus("56bbd06d-38b9-46c9-b179-d14a15416a72", "IN_PROGRESS").then(res=>console.log(res))
-// db.changeInvoiceStatus("b23a29b4-4999-4e89-91d5-77484caba672", "IN_PROGRESS").then(res=>console.log(res))
+// db.changeInvoiceStatus("6403a888-b88d-4f9e-92bc-a54e7436dd1e", "PAID").then(res=>console.log(res))
 // db.addInternalCoinsbitTxId("e82ba4c8-9d09-46f8-ae63-0108fd526bb0", "c9321762-3109-4eaf-afe8-cd62ebf1702d").then(res=>console.log(res))
 // db.getAllOrdersByStatus(SUCCESS).then(res=>console.log(res))
 // db.getOrdersByUserId(350985285).then(res=>console.log(res))
@@ -464,5 +462,6 @@ const sendMessageToId = (userId, messageData) => {
 }
 
 const statusChecker = new StatusChecker(db, fetchToCoinsbit, sendMessageToId);
-statusChecker.statusInvoiceChecher();
+statusChecker.paidStatusChecher();
 statusChecker.statusPlcChecher();
+statusChecker.succesStatusChecher();
