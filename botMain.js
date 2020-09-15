@@ -237,13 +237,13 @@ const chooseCurrencyPaymentGatewayMenu = Telegraf.Extra
 paymentGatewayScene.enter((ctx) => {
     if((ctx.session.paymentCurrency === `USD (US Dollar)` || ctx.session.paymentCurrency === `EUR (EURO)`) && ctx.session.currencyRate){
         ctx.session.purchaseCurrencyAmount = roundUp((ctx.session.plc_amount*ctx.session.currencyRate),-2)
-        ctx.reply(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${ctx.session.purchaseCurrencyAmount} ${ctx.session.paymentCurrency.split(" ")[0]} \nYour address - ${ctx.session.userAddress} \n\nPress "*Continue*" to make a payment.`,chooseCurrencyPaymentGatewayMenu)
+        ctx.reply(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${ctx.session.purchaseCurrencyAmount} ${ctx.session.paymentCurrency.split(" ")[0]} plus deposit fee\nYour address - ${ctx.session.userAddress} \n\nPress "*Continue*" to make a payment.`,chooseCurrencyPaymentGatewayMenu)
     } else if(ctx.session.paymentCurrency === `USDT (Tether USD)` && ctx.session.currencyRate){
         ctx.session.purchaseCurrencyAmount = roundUp((ctx.session.plc_amount*ctx.session.currencyRate),-4)
-        ctx.replyWithMarkdown(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${ctx.session.purchaseCurrencyAmount} ${ctx.session.paymentCurrency.split(" ")[0]} \nYour address - ${ctx.session.userAddress} \n\n*Note!* USDT accepted only ERC20. Send only ERC20 USDT! \n\nPress "*Continue*" to make a payment.`,chooseCurrencyPaymentGatewayMenu)
+        ctx.replyWithMarkdown(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${ctx.session.purchaseCurrencyAmount} ${ctx.session.paymentCurrency.split(" ")[0]} plus deposit fee\nYour address - ${ctx.session.userAddress} \n\n*Note!* USDT accepted only ERC20. Send only ERC20 USDT! \n\nPress "*Continue*" to make a payment.`,chooseCurrencyPaymentGatewayMenu)
     } else if((ctx.session.paymentCurrency === `PAX (Paxos Standard)` || ctx.session.paymentCurrency === `TUSD (TrueUSD)`) && ctx.session.currencyRate){
         ctx.session.purchaseCurrencyAmount = roundUp((ctx.session.plc_amount*ctx.session.currencyRate),-4)
-        ctx.reply(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${ctx.session.purchaseCurrencyAmount} ${ctx.session.paymentCurrency.split(" ")[0]} \nYour address - ${ctx.session.userAddress} \n\nPress "*Continue*" to make a payment.`,chooseCurrencyPaymentGatewayMenu)
+        ctx.reply(`Great! You choose ${ctx.session.paymentCurrency} as currency for payment \n\nYou want to buy - ${ctx.session.plc_amount} PLC \nYou need to pay - ${ctx.session.purchaseCurrencyAmount} ${ctx.session.paymentCurrency.split(" ")[0]} plus deposit fee\nYour address - ${ctx.session.userAddress} \n\nPress "*Continue*" to make a payment.`,chooseCurrencyPaymentGatewayMenu)
     } else ctx.reply(`Sorry, there was an error in calculating the purchase ${ctx.session.paymentCurrency} amount`, paymentlinkFiatMenu)
 
 })
@@ -302,7 +302,7 @@ paymentGatewayScene.hears(['❌ Cancel','❌ Cancel', '🚙 Back to main', 'Back
 // -=-=-=-=-=-=- PAYMENT LINK CRYPTO SCENE =-=-=-=-=-=
 paymentLinkCryptoScene.enter((ctx) => {
     if(ctx.session.InvoiceLink){
-        ctx.replyWithMarkdown('Please wait, order is being created...', paymentlinkFiatMenu)
+        ctx.replyWithMarkdown('Please wait, order is being created...', PriceMenu)
             setTimeout(() => {
         ctx.replyWithMarkdown(`Great! This order will be active in 1 day. Please click on **[Go to Invoice](${ctx.session.InvoiceLink})** and make a payment. After payment will be success you recieve the notification about status of your *${ctx.session.plc_amount}* PLC in 5 - 90 mins. \nIf you pay but don't recieve your PLC in 90 mins - please contact support@platincoin.com`,  {
             reply_markup: Markup.inlineKeyboard([[
@@ -313,10 +313,14 @@ paymentLinkCryptoScene.enter((ctx) => {
             ]]).resize()
             // reply_markup: Markup.callbackButton('🚙 Back to main', 'Back to main'),
         })
+        // ctx.scene.enter('greeter')
         }, 100);
     } else ctx.replyWithMarkdown(`Sorry, there was an error during invoice creation, please try again`, paymentlinkFiatMenu)
 })
-
+paymentLinkCryptoScene.hears(['💰 Buy PLC','Buy PLC'], (ctx) => {
+    ctx.reply('Please choose or input amount PLC what you want to buy!', buiyngSceneMenu)
+    ctx.scene.enter('buiyng')
+})
 const paymentlinkFiatMenu = Telegraf.Extra
 .markup((m) => m.keyboard([
     m.callbackButton('❌ Cancel', 'Back to main'),
@@ -370,7 +374,7 @@ ${humanDate(element.timestamp*1000)}
 *invoice*: ${element.invoiceId}
 *address*:${element.userAddress}
 *amount*: ${element.amountPLC} PLC
-*paid*: ${element.purchaseCurrencyAmount} ${element.purchaseCurrency}
+*paid*: ${element.purchaseCurrencyAmount} ${element.purchaseCurrency} plus deposit fee
 *txHash*: https://platincoin.info/#/tx/${element.hash}
 `, {
         parse_mode: "markdown"
@@ -381,7 +385,7 @@ ${humanDate(element.timestamp*1000)}
 *invoice*: ${element.invoiceId}
 *address*:${element.userAddress}
 *amount*: ${element.amountPLC} PLC
-*paid*: ${element.purchaseCurrencyAmount} ${element.purchaseCurrency}
+*paid*: ${element.purchaseCurrencyAmount} ${element.purchaseCurrency} plus deposit fee
 *txHash*:
 `, {
         parse_mode: "markdown"
@@ -423,6 +427,7 @@ bot.use(session())
 bot.use(stage.middleware())
 // bot.start((ctx) => ctx.scene.enter('greeter'))
 bot.start((ctx) => {
+    console.log(ctx.message)
     // ctx.reply('Please choose variant from buttons bellow')
     ctx.scene.enter('greeter')
 })

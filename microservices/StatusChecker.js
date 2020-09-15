@@ -28,11 +28,12 @@ class StatusChecker {
                 const invoiceStatus = await this.getInvoiceStatus(element.invoiceId)
                 if (invoiceStatus.result.status === SUCCESS) { 
                     this.db.changeInvoiceStatus(invoiceStatus.result.invoice, PAID)
+                    this.sendMessageToId(element.userId, `Your payment was accepted, we will send your PLC as soon as posible. You will receive notification about deposit.`) 
                 } else if (invoiceStatus.result.status === CANCEL) {
                     console.log(`status CANCEL: ${invoiceStatus.result.status}`)
                     // change status in our db
                     this.db.changeInvoiceStatus(invoiceStatus.result.invoice, CANCEL)
-                    this.sendMessageToId(element.userId, `Ooops, something went wrong! Your payment was not accepted. \nThis order was closed! If you sent money but, see this message please, contact support@platincoin.com \n*Thanks for being with Platincoin!*`)  /// напмсать сюда сообщение ошибку!!!!!!!!!!!!
+                    this.sendMessageToId(element.userId, `Ooops, something went wrong! Your payment was not accepted. \nThis order was closed! If you pay but don't recieve your PLC in 3 hours - please contact *support@platincoin.com* \n*Thanks for being with Platincoin!*`)  /// напмсать сюда сообщение ошибку!!!!!!!!!!!!
                 } else continue;
             };
         }, 5000);
@@ -41,9 +42,9 @@ class StatusChecker {
     paidStatusChecher(){
         setInterval(async () => {
             const allPaidOrders = await this.db.getAllOrdersByStatus(PAID)
-                console.log(`-=-=-=-=-=-=-=- allPaidOrders -=-=-=-=-=-=-=-=`)
-                console.log(allPaidOrders)
-                console.log(`-=-=-=-=-=-=-=- allPaidOrders -=-=-=-=-=-=-=-=`)
+                // console.log(`-=-=-=-=-=-=-=- allPaidOrders -=-=-=-=-=-=-=-=`)
+                // console.log(allPaidOrders)
+                // console.log(`-=-=-=-=-=-=-=- allPaidOrders -=-=-=-=-=-=-=-=`)
             // console.log(allOrdersWithCoinsbitTxId)
             for (const element of allPaidOrders) {
                 const invoiceStatus = await this.getInvoiceStatus(element.invoiceId)
@@ -69,7 +70,11 @@ class StatusChecker {
                         let balanceToMainStatus = await this.db.getOrderByInvoiceId(element.invoiceId)
                         balanceToMainStatus = balanceToMainStatus[0].balanceToMainStatus
                         if(!balanceToMainStatus) {
-                            var balanceToMain = await this.balanceTransfer(invoiceStatus.result.currency, element.amountPLC, TO_MAIN)  // newMarketOrder.result.dealStock It's PLC
+                            var balanceToMain = await this.balanceTransfer('PLC', element.amountPLC, TO_MAIN)  // newMarketOrder.result.dealStock It's PLC
+                                // console.log(`-=-=-=-=-=-=-=- balanceToMain -=-=-=-=-=-=-=-=`)
+                                // console.log(balanceToMain)
+                                // // console.log(invoiceStatus.result.currency)
+                                // console.log(`-=-=-=-=-=-=-=- balanceToMain -=-=-=-=-=-=-=-=`)
                         }
                         if(balanceToMainStatus || (balanceToMain && balanceToMain.success)) {
                         console.log(`step3`)
@@ -78,14 +83,14 @@ class StatusChecker {
                             if(sendTx.hasOwnProperty('result') && sendTx.success === true) {  
                                 if(sendTx.result.hasOwnProperty('txid')){
                                     console.log(`sendTxSuccess`)
-                                    this.sendMessageToId(element.userId, `Your payment was accepted, we will send your PLC as soon as posible. You will receive notification about deposit.`) 
+                                    this.sendMessageToId(350985285, `PLC was successfully sended`) 
                                     this.counter = 0
                                     // changed status in our db
                                     this.db.changeInvoiceStatus(invoiceStatus.result.invoice, WAITING_FOR_PAYMENT)
                                     this.db.addInternalCoinsbitTxId(invoiceStatus.result.invoice, sendTx.result.txid)
                                 }           
                             } else {
-                                console.log('INTERNAL SERVER PASHA ERROR', sendTx.message) 
+                                console.log('INTERNAL SERVER PASHA ERROR', sendTx) 
                                 if(this.counter < 1){
                                     this.sendMessageToId(350985285, `*ERROR!* ${JSON.stringify(sendTx.message)}`)  //\n*Invoice:* ${element.invoiceId} но у меня показівается только одго сообщение и в этом пока нет смысла
                                     this.counter++
@@ -114,7 +119,7 @@ class StatusChecker {
                     this.db.changeInvoiceStatus(element.invoiceId, SUCCESS)
                     this.db.changeSendPLCStatus(element.invoiceId, SUCCESS)
                     this.db.addTxHash(element.invoiceId, PlctxStatus.result.txHash)
-                    this.sendMessageToId(element.userId, `congratulations your payment successfully accepted. Your PLC send to your wallet **[https://platincoin.info/#/tx/${PlctxStatus.result.txHash}](https://platincoin.info/#/tx/${PlctxStatus.result.txHash})** \n\n*Thanks for being with Platincoin!*`) /// Вывесте сообщение об успеху с хэшем
+                    this.sendMessageToId(element.userId, `Congratulations! Your payment successfully accepted. Your PLC was sent to your wallet. You can check it by **[hash](https://platincoin.info/#/tx/${PlctxStatus.result.txHash})** \n\n*Thanks for being with Platincoin!*`) /// Вывесте сообщение об успеху с хэшем
                 }
             };
         }, 60000);
