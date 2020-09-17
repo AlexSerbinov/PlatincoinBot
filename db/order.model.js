@@ -34,6 +34,11 @@ const OrderSchema = new Schema({
         type: String,
         required: true
     },
+    paidCurrencyAmount: {
+        type: Number,
+        default: 0,
+        required: true
+    },
     purchaseCurrencyAmount: {
         type: Number,
         required: true

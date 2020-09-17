@@ -101,10 +101,30 @@ class Order {
         }
     }
 
+    // static async getPaidAmount(id){
+    //     try {
+    //         return orderModel
+	// 	        .find({invoiceId: id})
+	// 	        .then(orders => orders); 
+    //     } catch (error) {
+    //         return error;
+    //     }
+    // }
+
     static async changeInvoiceStatus(invoiceId, invoiceStatus){
         try {
             return orderModel
                 .findOneAndUpdate({invoiceId}, {invoiceStatus})
+                .then(order => order)
+        } catch (error) {
+            return error;
+        }
+    }
+
+    static async changePaidCurrencyAmount(invoiceId, paidCurrencyAmount){
+        try {
+            return orderModel
+                .findOneAndUpdate({invoiceId}, {paidCurrencyAmount})
                 .then(order => order)
         } catch (error) {
             return error;

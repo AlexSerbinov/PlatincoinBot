@@ -15,13 +15,13 @@ const {
 const bot = new Telegraf(process.env.BOT_TOKEN);
 // test methods for db
 // db.getAllOrders().then(res=>console.log(res))
-// db.getAllOrdersByStatus().then(res=>console.log(res))
-// db.getOrderByInvoiceId('f95ed7a5-764f-4788-b89e-dbc8877227d8').then(res=>console.log(res))
+// db.getAllOrdersByStatus('WAITING_FOR_PAYMENT').then(res=>console.log(res))
+// db.getOrderByInvoiceId('324c3f0b-68b8-4285-b26f-4c1dbcb4fe0e').then(res=>console.log(res))
 // db.deleteAllOrders().then(res=>console.log(res))
-// db.deleteOrderByInvoiceId('c94ffdf5-53f5-4d5d-a7cb-d7dd8861e7a3').then(res=>console.log(res))
+// db.deleteOrderByInvoiceId('a8731e15-7499-485c-ba49-ff67234db1dc').then(res=>console.log(res))
 // db.deleteAllOrdersByUserId('350985285').then(res=>console.log(res))
 // db.addTxHash('8626be93-7e97-42a0-87cf-0fda4e1b3b76', "hashhash-hsah").then(res=>console.log(res))
-// db.changeInvoiceStatus("6403a888-b88d-4f9e-92bc-a54e7436dd1e", "PAID").then(res=>console.log(res))
+// db.changeInvoiceStatus("eefdd6cc-c64b-435a-b200-d7b8841431aa", "CANCEL").then(res=>console.log(res))
 // db.addInternalCoinsbitTxId("e82ba4c8-9d09-46f8-ae63-0108fd526bb0", "c9321762-3109-4eaf-afe8-cd62ebf1702d").then(res=>console.log(res))
 // db.getAllOrdersByStatus(SUCCESS).then(res=>console.log(res))
 // db.getOrdersByUserId(350985285).then(res=>console.log(res))
@@ -358,58 +358,31 @@ const infoSceneMenu = Telegraf.Extra
 
 
 // -=-=-=-=-=-= MY PAYMENTS SCENE =-=-=-=-=-=
-// myPaymentsHistoryScene.enter(async (ctx) => {
 async function showPaymentHistory(ctx){
     let allOrdersByUser = await db.getOrdersByUserId(ctx.message.chat.id)
+    let sortArray = allOrdersByUser.sort((function(a, b){
+        return a.timestamp-b.timestamp
+    }))
     if(allOrdersByUser.length === 0) ctx.replyWithMarkdown(`You don't have any transactions yet!`)
     else {
         let i = 0;
-        allOrdersByUser.forEach(element => {
-        try {
-            if(element.invoiceStatus !== 'CANCEL'){
-                i++
-                if(element.hash){
-                ctx.replyWithMarkdown(`
-${humanDate(element.timestamp*1000)}
-*invoice*: ${element.invoiceId}
-*address*:${element.userAddress}
-*amount*: ${element.amountPLC} PLC
-*paid*: ${element.purchaseCurrencyAmount} ${element.purchaseCurrency} plus deposit fee
-*txHash*: https://platincoin.info/#/tx/${element.hash}
-`, {
-        parse_mode: "markdown"
-    })
-        } else {
-            ctx.replyWithMarkdown(`
-${humanDate(element.timestamp*1000)}
-*invoice*: ${element.invoiceId}
-*address*:${element.userAddress}
-*amount*: ${element.amountPLC} PLC
-*paid*: ${element.purchaseCurrencyAmount} ${element.purchaseCurrency} plus deposit fee
-*txHash*:
-`, {
-        parse_mode: "markdown"
-    })
-        }
+        let timer = setInterval(function() {
+            if (i >= sortArray.length) {
+            clearInterval(timer);
+            } else {
+                if(sortArray[i].invoiceStatus !== 'CANCEL'){
+                    if(sortArray[i].hash){
+                        ctx.replyWithMarkdown(`${humanDate(sortArray[i].timestamp*1000)}\n*invoice*: ${sortArray[i].invoiceId}\n*address*:${sortArray[i].userAddress}\n*amount*: ${sortArray[i].amountPLC} PLC\n*paid*: ${sortArray[i].paidCurrencyAmount} ${sortArray[i].purchaseCurrency} plus deposit fee\n*txHash*: https://platincoin.info/#/tx/${sortArray[i].hash}`, {parse_mode: "markdown"})
+                    } else {
+                        ctx.replyWithMarkdown(`${humanDate(sortArray[i].timestamp*1000)}\n*invoice*: ${sortArray[i].invoiceId}\n*address*:${sortArray[i].userAddress}\n*amount*: ${sortArray[i].amountPLC} PLC\n*paid*: ${sortArray[i].paidCurrencyAmount} ${sortArray[i].purchaseCurrency} plus deposit fee\n*txHash*:\n`, {parse_mode: "markdown"})
+                    }
+                }
+                    i++
             }
-        } catch (error) {  
-        }
-    });
-        if(i === 0) ctx.replyWithMarkdown(`You don't have any transactions yet!`)
+        }, 10);
     }
-    //     ctx.replyWithMarkdown(`
-    //         *invoiceLink*:${element.invoiceLink}
-    //         *address*:${element.address}
-    //         *amountPLC*:${element.amountPLC}
-    //         *purchaseCurrency*:${element.purchaseCurrency}
-    //         *purchaseCurrencyAmount*:${element.purchaseCurrencyAmount}
-    //         *status*:${element.status}
-    //         *txHash*:${element.hash}
-    //     `)
-    // });
-    // ctx.scene.enter(ctx.session.currentScene)
-// })
 }
+
 const myPaymentsHistorySceneMenu = Telegraf.Extra
 .markdown()
 .markup((m) => m.keyboard([
@@ -427,7 +400,7 @@ bot.use(session())
 bot.use(stage.middleware())
 // bot.start((ctx) => ctx.scene.enter('greeter'))
 bot.start((ctx) => {
-    console.log(ctx.message)
+    // console.log(ctx.message)
     // ctx.reply('Please choose variant from buttons bellow')
     ctx.scene.enter('greeter')
 })
@@ -466,7 +439,7 @@ const sendMessageToId = (userId, messageData) => {
     })
 }
 
-const statusChecker = new StatusChecker(db, fetchToCoinsbit, sendMessageToId);
+const statusChecker = new StatusChecker(db, fetchToCoinsbit, fetchCurrencyPairRate, sendMessageToId);
 statusChecker.paidStatusChecher();
 statusChecker.statusPlcChecher();
 statusChecker.succesStatusChecher();

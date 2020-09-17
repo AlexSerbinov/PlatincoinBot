@@ -9,6 +9,7 @@ const PAX = 'PAX'
 const IN_PROGRESS = 'IN_PROGRESS'
 const INITIALIZATION = 'INITIALIZATION'
 const PENDING = 'PENDING'
+const SUCCESS_SMALL_AMOUNT = 'SUCCESS_SMALL_AMOUNT'
 const PAID = 'PAID'
 const SUCCESS = 'SUCCESS'
 const CANCEL = 'CANCEL'
@@ -20,6 +21,7 @@ const TO_MAIN = 'tomain'
 
 // COINSBIT API URL's
 const GENERATE = 'https://coinsbit.io/api/v1/merchant/generate_invoice'
+const GET_BALANCE = 'https://coinsbit.io/api/v1/payment/balances'
 const GET_STATUS = 'https://coinsbit.io/api/v1/merchant/invoice_status'
 const BALANCE_TRANSFER = 'https://slave1.coinsdev.space/api/v1/payment/balancetransfer'
 const NEW_MARKET_ORDER = 'https://slave1.coinsdev.space/api/v1/payment/newmarketorder'
@@ -37,6 +39,7 @@ module.exports = {
     IN_PROGRESS,
     INITIALIZATION,
     PENDING,
+    SUCCESS_SMALL_AMOUNT,
     SUCCESS,
     PAID,
     CANCEL,
@@ -44,6 +47,7 @@ module.exports = {
     TO_TRADE,
     TO_MAIN,
     GENERATE,
+    GET_BALANCE,
     GET_STATUS,
     BALANCE_TRANSFER,
     NEW_MARKET_ORDER,
