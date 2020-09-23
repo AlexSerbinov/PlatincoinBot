@@ -13,15 +13,19 @@ const {
     GENERATE,
 } = require('./constants')
 const bot = new Telegraf(process.env.BOT_TOKEN);
+
 // test methods for db
 // db.getAllOrders().then(res=>console.log(res))
 // db.getAllOrdersByStatus('WAITING_FOR_PAYMENT').then(res=>console.log(res))
-// db.getOrderByInvoiceId('324c3f0b-68b8-4285-b26f-4c1dbcb4fe0e').then(res=>console.log(res))
+// db.getOrderByInvoiceId('938570e3-bc7e-4344-bbc1-b4f7214a146f').then(res=>console.log(res))
+// db.addInternalCoinsbitTxId('5cfac364-449a-4e2c-816e-146031b41795','18d8997d-064a-466d-ab08-f50c6102b1c2').then(res=>console.log(res))
 // db.deleteAllOrders().then(res=>console.log(res))
-// db.deleteOrderByInvoiceId('a8731e15-7499-485c-ba49-ff67234db1dc').then(res=>console.log(res))
+// db.deleteOrderByInvoiceId('7256abbd-b4b7-4605-b773-6e6b011de3d9').then(res=>console.log(res))
 // db.deleteAllOrdersByUserId('350985285').then(res=>console.log(res))
 // db.addTxHash('8626be93-7e97-42a0-87cf-0fda4e1b3b76', "hashhash-hsah").then(res=>console.log(res))
-// db.changeInvoiceStatus("eefdd6cc-c64b-435a-b200-d7b8841431aa", "CANCEL").then(res=>console.log(res))
+// db.changeInvoiceStatus("938570e3-bc7e-4344-bbc1-b4f7214a146f", "WAITING_FOR_PAYMENT").then(res=>console.log(res))
+// db.changePaidCurrencyAmount("938570e3-bc7e-4344-bbc1-b4f7214a146f", 11.2).then(res=>console.log(res))
+// db.changeBalanceToTradeStatus("a460bc7d-4892-43fb-bdeb-1de639be6827", false).then(res=>console.log(res))
 // db.addInternalCoinsbitTxId("e82ba4c8-9d09-46f8-ae63-0108fd526bb0", "c9321762-3109-4eaf-afe8-cd62ebf1702d").then(res=>console.log(res))
 // db.getAllOrdersByStatus(SUCCESS).then(res=>console.log(res))
 // db.getOrdersByUserId(350985285).then(res=>console.log(res))
@@ -47,7 +51,6 @@ greeterScene.enter((ctx) => {
     ctx.replyWithMarkdown('Hello! Welcome to the *Platincoin*! \nPlease choose option from buttons bellow' ,PriceMenu)
     ctx.session.currentSceneForInfo = 'greeter'
 })
-// greeterScene.enter((ctx) => ctx.reply('Please choose option from buttons bellow' ,PriceMenu))
 greeterScene.hears(['💰 Buy PLC','Buy PLC'], (ctx) => {
     ctx.reply('Please choose or input amount PLC what you want to buy!', buiyngSceneMenu)
     ctx.scene.enter('buiyng')
@@ -64,11 +67,9 @@ buiyngScene.hears(['❌ Cancel','❌ Cancel', '🚙 Back to main', 'Back to main
     ctx.scene.enter('greeter')
 })
 buiyngScene.hears(['ℹ️ My Payments','My Payments'], (ctx) => {
-    // ctx.scene.enter('myPayments')
     showPaymentHistory(ctx)
 })
 buiyngScene.hears(['ℹ️ Info','Info'], (ctx) => {
-    // ctx.scene.enter('info')
     ctx.reply('PLATINCOIN (PLC) is a blockchain product and digital currency designed to address online payment challenges. PLC is a cryptocurrency with its own closed ecosystem. We are provide various opportunities, such as Power Minter and PLC Secure Box for passive earnings, ATM cryptomats for instant transfer of PLC to fiat, PoS terminals for paying for goods and services using PLC, Marketplace for selling your own goods and developing your business. \nSite: https://platincoin.com/en \nWe on CoinMarketCap: https://coinmarketcap.com/ru/currencies/platincoin/')
 
 })
@@ -76,7 +77,7 @@ buiyngScene.on('message', (ctx) => {
     ctx.session.plc_amount = getNumberFromString(ctx.message.text)
     if(ctx.session.plc_amount) {
         if(ctx.session.plc_amount <2 || ctx.session.plc_amount>1000000) ctx.replyWithMarkdown(`Ooops! The amount must be at least 2 PLC and no more than 1000000 PLC`)
-        else{    // else {
+        else{  
             const voidMenu1 = Telegraf.Extra
             .markup((m) => m.keyboard([
                 m.callbackButton('❌ Cancel', 'Cancel'),
@@ -130,16 +131,13 @@ validateAddressScene.enter((ctx => {
     ctx.reply(`Great! Your order was accepted! You will get ${ctx.session.plc_amount} PLC! \nPlease, *send your PLC address* to recieve your *Platincoin*!`, validateAddressSceneMenu)
 })
     )
-
 validateAddressScene.hears(['❌ Cancel','❌ Cancel', '🚙 Back to main', 'Back to main'], (ctx) => {
     ctx.scene.enter('greeter')
 })
 validateAddressScene.hears(['ℹ️ Info','Info'], (ctx) => {
-    // ctx.scene.enter('info')
     ctx.reply('PLATINCOIN (PLC) is a blockchain product and digital currency designed to address online payment challenges. PLC is a cryptocurrency with its own closed ecosystem. We are provide various opportunities, such as Power Minter and PLC Secure Box for passive earnings, ATM cryptomats for instant transfer of PLC to fiat, PoS terminals for paying for goods and services using PLC, Marketplace for selling your own goods and developing your business. \nSite: https://platincoin.com/en \nWe on CoinMarketCap: https://coinmarketcap.com/ru/currencies/platincoin/')
 })
 validateAddressScene.hears(['ℹ️ My Payments', 'My Payments'], (ctx) => {
-    // ctx.scene.enter('info')
     showPaymentHistory(ctx)
 })
 validateAddressScene.hears(['⬅️ Change amount','Change amount'], (ctx) => {
@@ -169,7 +167,6 @@ const validateAddressSceneMenu = Telegraf.Extra
     ]]).resize())
 
 const validateAddress = address => {
-    // return true
     return address.match(/^P{1}[a-km-zA-HJ-NP-Z1-9]{25,38}$/gm)
 }
 // -=-=-=-=-=-= VALIDATE ADDRESS SCENE =-=-=-=-=-=
@@ -182,7 +179,6 @@ choseCurrencyScene.enter((ctx) => {
 })
 choseCurrencyScene.hears(['USDT (Tether USD)','USDT', 'TUSD (TrueUSD)', 'TUSD', 'PAX (Paxos Standard)', 'PAX', 'USD (US Dollar)', 'USD', 'EUR (EURO)', 'EUR'], async (ctx) =>{
     ctx.session.paymentCurrency = `${ctx.message.text}`
-    // ctx.scene.enter('paymentGateway') // по идее будет 2 разных пэймэнт гатевэй для двух разных способа оплаты
     if(ctx.session.paymentCurrency) ctx.session.currencyRate = await fetchCurrencyPairRate(ctx.session.paymentCurrency)
     if(ctx.session.currentScene){
         ctx.scene.enter(ctx.session.currentScene)
@@ -190,17 +186,6 @@ choseCurrencyScene.hears(['USDT (Tether USD)','USDT', 'TUSD (TrueUSD)', 'TUSD', 
     else ctx.scene.enter('paymentGateway')
 })
 
-// choseCurrencyScene.hears(['✅ Continue','Continue'], (ctx) => {
-//     console.log(`continue under scene`)
-
-//     ctx.scene.enter('paymentLinkCryptoScene')
-// })
-// choseCurrencyScene.hears(['⬅️ Change address','Change address'], (ctx) => {
-//     console.log(`change address under scene`)
-//     ctx.reply(`Please send your PLC address to recieve your *Platincoin*!`, voidMenu1)
-//     ctx.session.currentScene = 'chooseCurrency'
-//     ctx.scene.enter('validateAddress')
-// })
 choseCurrencyScene.hears(['❌ Cancel','❌ Cancel', '🚙 Back to main', 'Back to main'], (ctx) => {
     ctx.scene.enter('greeter')
 })
@@ -257,7 +242,6 @@ paymentGatewayScene.hears(['✅ Continue','Continue'], async (ctx) => {
         "nonce": (Date.now()/1000).toFixed()
     }
     const result = await fetchToCoinsbit(data, GENERATE)
-    // console.log('result', result)
     if(result.success === true) {
         db.createOrder({
             userId: ctx.update.message.from.id,
@@ -281,14 +265,11 @@ paymentGatewayScene.hears(['⬅️ Change address','Change address'], (ctx) => {
     ctx.scene.enter('validateAddress')
 })
 paymentGatewayScene.hears(['⬅️ Change currency','Change currency'], (ctx) => {
-    // ctx.reply(`Please send your PLC address to recieve your *Platincoin*!`, voidMenu1)
     ctx.session.currentScene = 'paymentGateway'
     ctx.scene.enter('chooseCurrency')
 })
 paymentGatewayScene.hears(['⬅️ Change amount','Change currency'], (ctx) => {
-    // ctx.reply(`Please send your PLC address to recieve your *Platincoin*!`, voidMenu1)
     ctx.reply('Please choose or input amount PLC what you want to buy!', buiyngSceneMenu)
-
     ctx.session.currentScene = 'paymentGateway'
     ctx.scene.enter('buiyng')
 })
@@ -304,16 +285,14 @@ paymentLinkCryptoScene.enter((ctx) => {
     if(ctx.session.InvoiceLink){
         ctx.replyWithMarkdown('Please wait, order is being created...', PriceMenu)
             setTimeout(() => {
-        ctx.replyWithMarkdown(`Great! This order will be active in 1 day. Please click on **[Go to Invoice](${ctx.session.InvoiceLink})** and make a payment. After payment will be success you recieve the notification about status of your *${ctx.session.plc_amount}* PLC in 5 - 90 mins. \nIf you pay but don't recieve your PLC in 90 mins - please contact support@platincoin.com`,  {
-            reply_markup: Markup.inlineKeyboard([[
-                {
-                    text: `Go to invoice`,
-                    url: `${ctx.session.InvoiceLink}`,
-                },
-            ]]).resize()
-            // reply_markup: Markup.callbackButton('🚙 Back to main', 'Back to main'),
-        })
-        // ctx.scene.enter('greeter')
+            ctx.replyWithMarkdown(`Great! This order will be active in 1 day. Please click on **[Go to Invoice](${ctx.session.InvoiceLink})** and make a payment. After payment will be success you recieve the notification about status of your *${ctx.session.plc_amount}* PLC in 5 - 90 mins. \nIf you pay but don't recieve your PLC in 90 mins - please contact support@platincoin.com`,  {
+                reply_markup: Markup.inlineKeyboard([[
+                    {
+                        text: `Go to invoice`,
+                        url: `${ctx.session.InvoiceLink}`,
+                    },
+                ]]).resize()
+            })
         }, 100);
     } else ctx.replyWithMarkdown(`Sorry, there was an error during invoice creation, please try again`, paymentlinkFiatMenu)
 })
@@ -327,12 +306,6 @@ const paymentlinkFiatMenu = Telegraf.Extra
     m.callbackButton('ℹ️ My Payments', 'My Payments'),
 ]).resize())
 .markdown()
-// .markup((m) => m.inlineKeyboard([
-//     {
-//         text: `Go to invoice`,
-//         url: `http://google.com`,
-//     },
-// ]).resize())
 // -=-=-=-=-=-=- PAYMENT LINK SCENE =-=-=-=-=-=
 
 
@@ -340,14 +313,6 @@ const paymentlinkFiatMenu = Telegraf.Extra
 // -=-=-=-=-=-=-=-= INFO SCENE -=-=-=-=-=-=-=
 infoScene.enter((ctx) => {
     ctx.reply('PLATINCOIN (PLC) is a blockchain product and digital currency designed to address online payment challenges. PLC is a cryptocurrency with its own closed ecosystem. We are provide various opportunities, such as Power Minter and PLC Secure Box for passive earnings, ATM cryptomats for instant transfer of PLC to fiat, PoS terminals for paying for goods and services using PLC, Marketplace for selling your own goods and developing your business. \nSite: https://platincoin.com/en \nWe on CoinMarketCap: https://coinmarketcap.com/ru/currencies/platincoin/')
-})
-infoScene.hears(['🚙 Back','Back'], (ctx) => {
-    // if(ctx.session.currentSceneForInfo){
-    //     ctx.scene.enter(ctx.session.currentSceneForInfo)
-    // }
-    // else {
-        ctx.scene.enter('greeter')
-    // }
 })
 const infoSceneMenu = Telegraf.Extra
 .markdown()
@@ -368,7 +333,7 @@ async function showPaymentHistory(ctx){
         let i = 0;
         let timer = setInterval(function() {
             if (i >= sortArray.length) {
-            clearInterval(timer);
+                clearInterval(timer);
             } else {
                 if(sortArray[i].invoiceStatus !== 'CANCEL'){
                     if(sortArray[i].hash){
@@ -377,41 +342,25 @@ async function showPaymentHistory(ctx){
                         ctx.replyWithMarkdown(`${humanDate(sortArray[i].timestamp*1000)}\n*invoice*: ${sortArray[i].invoiceId}\n*address*:${sortArray[i].userAddress}\n*amount*: ${sortArray[i].amountPLC} PLC\n*paid*: ${sortArray[i].paidCurrencyAmount} ${sortArray[i].purchaseCurrency} plus deposit fee\n*txHash*:\n`, {parse_mode: "markdown"})
                     }
                 }
-                    i++
+                i++
             }
         }, 10);
     }
 }
 
-const myPaymentsHistorySceneMenu = Telegraf.Extra
-.markdown()
-.markup((m) => m.keyboard([
-    m.callbackButton('❌ Cancel', 'Back to main'),
-]).resize())
-// -=-=-=-=-=-= MY PAYMENTS SCENE =-=-=-=-=-=
-
-
-
-
 const stage = new Stage([greeterScene,buiyngScene, infoScene, myPaymentsHistoryScene, validateAddressScene, choseCurrencyScene, paymentGatewayScene, paymentLinkCryptoScene])
-// stage.register(buiyngScene)
 stage.command('cancel', leave())
 bot.use(session())
 bot.use(stage.middleware())
-// bot.start((ctx) => ctx.scene.enter('greeter'))
 bot.start((ctx) => {
-    // console.log(ctx.message)
-    // ctx.reply('Please choose variant from buttons bellow')
     ctx.scene.enter('greeter')
 })
-
 
 // -=-=-=-=-=-= COMMON METHODS =-=-=-=-=-=
 bot.hears(['❌ Cancel','❌ Cancel', '🚙 Back to main', 'Back to main'], (ctx) => {
     ctx.scene.enter('greeter')
 })
 bot.hears(['ℹ️ My Payments','My Payments'], (ctx) => {
-    // ctx.scene.enter('myPayments')
     showPaymentHistory(ctx)
 })
 bot.hears(['💰 Buy PLC','Buy PLC'], (ctx) => {
@@ -419,18 +368,11 @@ bot.hears(['💰 Buy PLC','Buy PLC'], (ctx) => {
     ctx.scene.enter('buiyng')
 })
 bot.hears(['ℹ️ Info','Info'], (ctx) => {
-    // ctx.scene.enter('info')
     ctx.replyWithMarkdown('*PLATINCOIN* (PLC) is a blockchain product and digital currency designed to address online payment challenges. PLC is a cryptocurrency with its own closed ecosystem. We are provide various opportunities, such as Power Minter and PLC Secure Box for passive earnings, ATM cryptomats for instant transfer of PLC to fiat, PoS terminals for paying for goods and services using PLC, Marketplace for selling your own goods and developing your business. \nSite: https://platincoin.com/en \nWe on CoinMarketCap: https://coinmarketcap.com/ru/currencies/platincoin/')
 
 })
 // -=-=-=-=-=-= COMMON METHODS =-=-=-=-=-=
 
-const helpMessage = 'help';
-bot.help(ctx => {
-    bot.telegram.sendMessage(ctx.from.id, helpMessage, {
-        parse_mode: "markdown"
-    })
-})
 bot.launch()
 
 const sendMessageToId = (userId, messageData) => {
@@ -442,4 +384,4 @@ const sendMessageToId = (userId, messageData) => {
 const statusChecker = new StatusChecker(db, fetchToCoinsbit, fetchCurrencyPairRate, sendMessageToId);
 statusChecker.paidStatusChecher();
 statusChecker.statusPlcChecher();
-statusChecker.succesStatusChecher();
+statusChecker.succesStatusChecker();

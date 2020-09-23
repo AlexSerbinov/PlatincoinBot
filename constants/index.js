@@ -30,6 +30,8 @@ const GET_TX_INFO = 'https://coinsbit.io/api/v1/payment/transaction'
 // const RETURN_URL = 'tg://resolve?domain=coinsbit_buy_sell_bot'
 const RETURN_URL = 't.me/PLC_Payment_Bot'
 
+// telegram profiles
+const ADMIN1_ADDRESS = 350985285
 module.exports = {
     USD,
     EUR,
@@ -53,4 +55,5 @@ module.exports = {
     NEW_MARKET_ORDER,
     MAKE_WITHDRAW,
     GET_TX_INFO,
+    ADMIN1_ADDRESS,
 }
