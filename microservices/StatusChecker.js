@@ -23,6 +23,7 @@ class StatusChecker {
         this.fetchToCoinsbit = fetchToCoinsbit;
         this.fetchCurrencyPairRate = fetchCurrencyPairRate;
         this.sendMessageToId = sendMessageToId;
+        // this.getInvoiceStatus('c55345a1-0ebf-4c0f-8477-604ce017a6fe')
     }
 
     succesStatusChecker(){
@@ -176,6 +177,7 @@ class StatusChecker {
                     this.sendMessageToId(ADMIN1_ADDRESS, `PLC was successfully sended`) 
                     this.counter = 0
                     console.log(`sendTx.result.txid = `, sendTx.result.txid)
+                    await this.db.changeFinalCurrencyAmount(invoiceStatus.result.invoice, amountPLC)
                     await this.db.addInternalCoinsbitTxId(invoiceStatus.result.invoice, sendTx.result.txid)
                     await this.db.changeInvoiceStatus(invoiceStatus.result.invoice, WAITING_FOR_PAYMENT)
                     return sendTx.result.txid
@@ -200,6 +202,7 @@ class StatusChecker {
             "nonce": (Date.now()).toFixed()
         }
         const invoice = await this.fetchToCoinsbit(txData, GET_STATUS)
+        // console.log(invoice)
         return invoice
     }
    async getPlcTransactionStatus(internalCoinsbitTxId) { 

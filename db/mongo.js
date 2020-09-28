@@ -131,6 +131,16 @@ class Order {
         }
     }
 
+    static async changeFinalCurrencyAmount(invoiceId, finalSendedPlc){
+        try {
+            return orderModel
+                .findOneAndUpdate({invoiceId}, {finalSendedPlc})
+                .then(order => order)
+        } catch (error) {
+            return error;
+        }
+    }
+
     static async changeBalanceToTradeStatus(invoiceId, balanceToTradeStatus){
         try {
             return orderModel

@@ -43,6 +43,10 @@ const OrderSchema = new Schema({
         type: Number,
         required: true
     },
+    finalSendedPlc: {
+        type: Number,
+        required: true
+    },
     invoiceStatus: {
         type: String,
         required: true
