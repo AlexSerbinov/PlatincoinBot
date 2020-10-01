@@ -339,7 +339,7 @@ async function showPaymentHistory(ctx){
                     if(sortArray[i].hash){
                         ctx.replyWithMarkdown(`${humanDate(sortArray[i].timestamp*1000)}\n*invoice*: ${sortArray[i].invoiceId}\n*address*:${sortArray[i].userAddress}\n*amount*: ${sortArray[i].finalSendedPlc} PLC\n*paid*: ${sortArray[i].paidCurrencyAmount} ${sortArray[i].purchaseCurrency} plus deposit fee\n*txHash*: https://platincoin.info/#/tx/${sortArray[i].hash}`, {parse_mode: "markdown"})
                     } else {
-                        ctx.replyWithMarkdown(`${humanDate(sortArray[i].timestamp*1000)}\n*invoice*: ${sortArray[i].invoiceId}\n*address*:${sortArray[i].userAddress}\n*amount*: ${sortArray[i].finalSendedPlc} PLC\n*paid*: ${sortArray[i].paidCurrencyAmount} ${sortArray[i].purchaseCurrency} plus deposit fee\n*txHash*:\n`, {parse_mode: "markdown"})
+                        ctx.replyWithMarkdown(`${humanDate(sortArray[i].timestamp*1000)}\n*invoice*: ${sortArray[i].invoiceId}\n*address*:${sortArray[i].userAddress}\n*amount*: ${sortArray[i].amountPLC} PLC\n*paid*: ${sortArray[i].paidCurrencyAmount} ${sortArray[i].purchaseCurrency} plus deposit fee\n*txHash*:\n`, {parse_mode: "markdown"})
                     }
                 }
                 i++
