@@ -14,10 +14,10 @@ const {
 } = require('./constants')
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-// test methods for db
+// methods for manual testing
 // db.getAllOrders().then(res=>console.log(res))
 // db.getAllOrdersByStatus('WAITING_FOR_PAYMENT').then(res=>console.log(res))
-// db.getOrderByInvoiceId('938570e3-bc7e-4344-bbc1-b4f7214a146f').then(res=>console.log(res))
+// db.getOrderByInvoiceId('c210a312-6df4-4e1e-9f4f-621249518453').then(res=>console.log(res))
 // db.addInternalCoinsbitTxId('5cfac364-449a-4e2c-816e-146031b41795','18d8997d-064a-466d-ab08-f50c6102b1c2').then(res=>console.log(res))
 // db.deleteAllOrders().then(res=>console.log(res))
 // db.deleteOrderByInvoiceId('7256abbd-b4b7-4605-b773-6e6b011de3d9').then(res=>console.log(res))
@@ -252,6 +252,7 @@ paymentGatewayScene.hears(['✅ Continue','Continue'], async (ctx) => {
             purchaseCurrency: result.result.currency,
             purchaseCurrencyAmount: (ctx.session.plc_amount*ctx.session.currencyRate).toFixed(4),
             invoiceStatus: IN_PROGRESS,
+            timestamp: (Date.now()/1000).toFixed(),
         })//.then(res=>console.log(res))
         ctx.session.InvoiceLink = result.result.redirect_link
     }
@@ -337,9 +338,17 @@ async function showPaymentHistory(ctx){
             } else {
                 if(sortArray[i].invoiceStatus !== 'CANCEL'){
                     if(sortArray[i].hash){
-                        ctx.replyWithMarkdown(`${humanDate(sortArray[i].timestamp*1000)}\n*invoice*: ${sortArray[i].invoiceId}\n*address*:${sortArray[i].userAddress}\n*amount*: ${sortArray[i].finalSendedPlc} PLC\n*paid*: ${sortArray[i].paidCurrencyAmount} ${sortArray[i].purchaseCurrency} plus deposit fee\n*txHash*: https://platincoin.info/#/tx/${sortArray[i].hash}`, {parse_mode: "markdown"})
+                        if(sortArray[i].finalSendedPlc){
+                            ctx.replyWithMarkdown(`${humanDate(sortArray[i].timestamp*1000)}\n*invoice*: ${sortArray[i].invoiceId}\n*address*:${sortArray[i].userAddress}\n*amount*: ${sortArray[i].finalSendedPlc} PLC\n*paid*: ${sortArray[i].paidCurrencyAmount} ${sortArray[i].purchaseCurrency} plus deposit fee\n*txHash*: https://platincoin.info/#/tx/${sortArray[i].hash}`, {parse_mode: "markdown"})
+                        }else{
+                            ctx.replyWithMarkdown(`${humanDate(sortArray[i].timestamp*1000)}\n*invoice*: ${sortArray[i].invoiceId}\n*address*:${sortArray[i].userAddress}\n*amount*: ${sortArray[i].amountPLC} PLC\n*paid*: ${sortArray[i].paidCurrencyAmount} ${sortArray[i].purchaseCurrency} plus deposit fee\n*txHash*: https://platincoin.info/#/tx/${sortArray[i].hash}`, {parse_mode: "markdown"})
+                        }
                     } else {
-                        ctx.replyWithMarkdown(`${humanDate(sortArray[i].timestamp*1000)}\n*invoice*: ${sortArray[i].invoiceId}\n*address*:${sortArray[i].userAddress}\n*amount*: ${sortArray[i].amountPLC} PLC\n*paid*: ${sortArray[i].paidCurrencyAmount} ${sortArray[i].purchaseCurrency} plus deposit fee\n*txHash*:\n`, {parse_mode: "markdown"})
+                        if(sortArray[i].finalSendedPlc){
+                            ctx.replyWithMarkdown(`${humanDate(sortArray[i].timestamp*1000)}\n*invoice*: ${sortArray[i].invoiceId}\n*address*:${sortArray[i].userAddress}\n*amount*: ${sortArray[i].finalSendedPlc} PLC\n*paid*: ${sortArray[i].paidCurrencyAmount} ${sortArray[i].purchaseCurrency} plus deposit fee\n*txHash*:\n`, {parse_mode: "markdown"})
+                        }else{
+                            ctx.replyWithMarkdown(`${humanDate(sortArray[i].timestamp*1000)}\n*invoice*: ${sortArray[i].invoiceId}\n*address*:${sortArray[i].userAddress}\n*amount*: ${sortArray[i].amountPLC} PLC\n*paid*: ${sortArray[i].paidCurrencyAmount} ${sortArray[i].purchaseCurrency} plus deposit fee\n*txHash*:\n`, {parse_mode: "markdown"})
+                        }
                     }
                 }
                 i++

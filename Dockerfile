@@ -1,8 +1,8 @@
-FROM node:10
-RUN mkdir -p /home/node/PlatincoinBot && chown -R node:node /home/node/PlatincoinBot
-WORKDIR /home/node/PlatincoinBot
+FROM node:12
+RUN mkdir -p /home/user-dev/platincoin/PlatincoinBot && chown -R node:node /home/user-dev/platincoin/PlatincoinBot
+WORKDIR /home/user-dev/platincoin/PlatincoinBot
 COPY package*.json ./
 USER node
 RUN npm install
-COPY --chown=node:node . .
+COPY --chown=root:root . .
 CMD [ "npm", "start" ]

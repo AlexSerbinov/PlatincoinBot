@@ -15,7 +15,7 @@
     "nodemon": "^2.0.4"
   },
   "scripts": {
-    "start": "nodemon botMain"
+    "start": "node botMain"
   },
   "repository": {
     "type": "git",
